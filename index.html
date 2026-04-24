@@ -1,0 +1,2633 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="حرب الابتكار">
+<meta name="theme-color" content="#0a0e27">
+<title>حرب الابتكار - سباق ريادة الأعمال</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;touch-action:manipulation}
+html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:#0a0e27;font-family:'Tajawal','Cairo','Segoe UI',Tahoma,Arial,sans-serif;color:#fff;overscroll-behavior:none;-webkit-text-size-adjust:100%;text-size-adjust:100%;position:fixed;touch-action:manipulation}
+#game{width:100vw;height:100vh;height:100dvh;position:relative;overflow:hidden;background:radial-gradient(ellipse at top,#1e2a5e 0%,transparent 60%),radial-gradient(ellipse at bottom,#2a1e5e 0%,transparent 60%),linear-gradient(180deg,#0a0e27 0%,#1a1f4e 50%,#0a0e27 100%)}
+#game::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle at 20% 20%,rgba(255,215,0,0.08) 0%,transparent 2%),radial-gradient(circle at 80% 30%,rgba(255,107,53,0.08) 0%,transparent 2%),radial-gradient(circle at 40% 70%,rgba(46,204,113,0.08) 0%,transparent 2%),radial-gradient(circle at 70% 80%,rgba(74,90,232,0.08) 0%,transparent 2%);background-size:200px 200px;animation:starfield 60s linear infinite;pointer-events:none}
+@keyframes starfield{from{background-position:0 0,0 0,0 0,0 0}to{background-position:200px 200px,-200px 200px,200px -200px,-200px -200px}}
+
+.screen{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px;overflow-y:auto;z-index:2}
+.screen.active{display:flex}
+
+.logo{font-size:clamp(34px,9vw,72px);font-weight:900;background:linear-gradient(90deg,#ffd700 0%,#ff6b35 50%,#ffd700 100%);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:2px;text-align:center;letter-spacing:-1px;animation:shine 3s linear infinite,float 3s ease-in-out infinite;filter:drop-shadow(0 0 20px rgba(255,215,0,0.4))}
+@keyframes shine{to{background-position:200% center}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.subtitle{font-size:clamp(12px,2.8vw,14px);opacity:0.8;margin-bottom:10px;text-align:center;letter-spacing:2px}
+.subtitle .sep{opacity:0.5;margin:0 6px}
+
+.btn{background:linear-gradient(135deg,#ff6b35 0%,#ffd700 100%);color:#0a0e27;border:none;padding:clamp(11px,2.8vw,14px) clamp(22px,5vw,36px);font-size:clamp(14px,3.4vw,16px);font-weight:800;font-family:inherit;border-radius:14px;cursor:pointer;margin:3px;min-width:220px;box-shadow:0 6px 20px rgba(255,107,53,0.4),inset 0 2px 0 rgba(255,255,255,0.3);transition:transform 0.15s,box-shadow 0.15s;text-align:center;position:relative;overflow:hidden}
+.btn::before{content:'';position:absolute;top:-50%;left:-100%;width:100%;height:200%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.4),transparent);transform:skewX(-25deg);animation:shimmer 3s infinite}
+@keyframes shimmer{0%,60%{left:-100%}100%{left:200%}}
+.btn:active{transform:scale(0.95)}
+.btn.secondary{background:linear-gradient(135deg,#4a5ae8 0%,#6b7fff 100%);color:#fff;box-shadow:0 6px 20px rgba(74,90,232,0.4),inset 0 2px 0 rgba(255,255,255,0.2)}
+.btn.ghost{background:rgba(255,255,255,0.08);color:#fff;box-shadow:none;border:1px solid rgba(255,255,255,0.2)}
+.btn.ghost::before{display:none}
+.btn.small{padding:8px 14px;font-size:14px;min-width:auto}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+
+.company-dashboard{display:grid;grid-template-columns:1fr 1fr;gap:6px;max-width:420px;width:100%;margin:6px 0 10px;padding:10px;background:linear-gradient(135deg,rgba(255,215,0,0.08),rgba(46,204,113,0.05));border:1px solid rgba(255,215,0,0.25);border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,0.3)}
+.dash-tile{background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:8px 10px;display:flex;flex-direction:column;align-items:flex-start;text-align:right}
+.dash-tile .dash-label{font-size:10px;opacity:0.75;display:flex;align-items:center;gap:4px;margin-bottom:3px}
+.dash-tile .dash-value{font-size:15px;font-weight:900;color:#ffd700;font-variant-numeric:tabular-nums}
+.dash-tile.bank .dash-value{color:#2ecc71}
+.dash-tile.customers .dash-value{color:#6b7fff}
+.dash-tile.recurring .dash-value{color:#ffd700}
+.dash-tile.rank .dash-value{font-size:13px;color:#ff9f43}
+
+.diff-label{font-size:12px;opacity:0.75;text-align:center;margin-bottom:4px}
+.difficulty-selector{display:flex;gap:6px;justify-content:center;margin:4px 0 10px;flex-wrap:wrap}
+.diff-btn{background:rgba(255,255,255,0.06);border:2px solid rgba(255,255,255,0.15);color:#fff;padding:8px 14px;border-radius:12px;font-weight:800;font-size:13px;font-family:inherit;cursor:pointer;transition:all 0.2s}
+.diff-btn:active{transform:scale(0.95)}
+.diff-btn.easy.selected{background:linear-gradient(135deg,rgba(46,204,113,0.35),rgba(26,188,156,0.2));border-color:#2ecc71;box-shadow:0 0 12px rgba(46,204,113,0.4)}
+.diff-btn.medium.selected{background:linear-gradient(135deg,rgba(255,215,0,0.35),rgba(255,107,53,0.2));border-color:#ffd700;box-shadow:0 0 12px rgba(255,215,0,0.4)}
+.diff-btn.hard.selected{background:linear-gradient(135deg,rgba(255,71,87,0.35),rgba(255,107,107,0.2));border-color:#ff4757;box-shadow:0 0 12px rgba(255,71,87,0.4)}
+
+.levels-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:8px;max-width:600px;width:100%;padding:10px}
+.level-tile{aspect-ratio:1;background:linear-gradient(135deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02));border:2px solid rgba(255,255,255,0.12);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-direction:column;font-weight:800;position:relative;cursor:pointer;transition:transform 0.15s;box-shadow:0 3px 10px rgba(0,0,0,0.3)}
+.level-tile .emoji{font-size:22px;margin-bottom:2px;filter:drop-shadow(0 2px 3px rgba(0,0,0,0.5))}
+.level-tile .num{font-size:12px}
+.level-tile.completed{background:linear-gradient(135deg,rgba(46,204,113,0.3),rgba(46,204,113,0.1));border-color:#2ecc71;box-shadow:0 3px 10px rgba(46,204,113,0.3)}
+.level-tile.current{background:linear-gradient(135deg,rgba(255,215,0,0.35),rgba(255,107,53,0.2));border-color:#ffd700;animation:pulseLevel 1.5s infinite;box-shadow:0 4px 16px rgba(255,215,0,0.5)}
+.level-tile.locked{opacity:0.3;cursor:not-allowed}
+@keyframes pulseLevel{0%,100%{transform:scale(1);box-shadow:0 4px 16px rgba(255,215,0,0.5)}50%{transform:scale(1.08);box-shadow:0 4px 24px rgba(255,215,0,0.8)}}
+.level-tile:active:not(.locked){transform:scale(0.92)}
+
+#battleScreen{padding:0;display:none}
+#battleScreen.active{display:flex}
+.battle-layout{width:100%;height:100%;display:grid;grid-template-rows:auto auto 1fr auto}
+
+.top-bar{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:linear-gradient(180deg,rgba(0,0,0,0.6),rgba(0,0,0,0.3));backdrop-filter:blur(12px);z-index:50;border-bottom:1px solid rgba(255,255,255,0.1)}
+.top-bar .info{display:flex;align-items:center;gap:8px;font-size:12px}
+.mv-bar-wrap{background:rgba(0,0,0,0.5);border-radius:10px;padding:3px;width:clamp(80px,18vw,130px);height:18px;position:relative;overflow:hidden;border:1px solid rgba(255,255,255,0.1)}
+.mv-bar{height:100%;border-radius:8px;transition:width 0.4s cubic-bezier(0.4,0,0.2,1);position:relative;overflow:hidden}
+.mv-bar::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.3),transparent);animation:hpShine 3s infinite}
+@keyframes hpShine{to{transform:translateX(100%)}}
+.mv-bar.enemy{background:linear-gradient(90deg,#ff4757,#ff6b6b)}
+.mv-bar.player{background:linear-gradient(90deg,#2ecc71,#1abc9c)}
+.mv-label{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;text-shadow:0 1px 2px rgba(0,0,0,0.8)}
+
+.sub-bar{display:flex;justify-content:space-between;align-items:center;padding:6px 10px;gap:6px;background:linear-gradient(180deg,rgba(0,0,0,0.5),rgba(0,0,0,0.2));border-bottom:1px solid rgba(255,255,255,0.05);font-size:11px;z-index:49;flex-wrap:wrap}
+.sub-pill{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);padding:4px 9px;border-radius:12px;display:flex;align-items:center;gap:4px;font-weight:700;font-size:11px}
+.sub-pill.month{background:linear-gradient(135deg,rgba(74,90,232,0.2),rgba(107,127,255,0.1));border-color:rgba(107,127,255,0.4)}
+.sub-pill.customers{background:linear-gradient(135deg,rgba(255,215,0,0.2),rgba(255,107,53,0.1));border-color:rgba(255,215,0,0.4);color:#ffd700}
+.sub-pill.quarter{background:linear-gradient(135deg,rgba(46,204,113,0.2),rgba(26,188,156,0.1));border-color:rgba(46,204,113,0.4);color:#2ecc71}
+
+.turn-indicator{background:linear-gradient(135deg,rgba(255,215,0,0.2),rgba(255,107,53,0.15));border:2px solid rgba(255,215,0,0.5);padding:6px 14px;border-radius:14px;font-weight:900;font-size:13px;display:flex;flex-direction:column;align-items:center;min-width:90px;text-align:center;box-shadow:0 2px 10px rgba(255,215,0,0.3)}
+.turn-indicator .phase-label{font-size:10px;opacity:0.85}
+.turn-indicator .countdown{color:#ffd700;font-size:18px;line-height:1;margin-top:2px}
+.turn-indicator.enemy-turn{border-color:rgba(255,71,87,0.5);background:linear-gradient(135deg,rgba(255,71,87,0.2),rgba(255,107,53,0.1))}
+.turn-indicator.enemy-turn .countdown{color:#ff6b6b}
+.turn-indicator.resolve{border-color:rgba(74,90,232,0.5);background:linear-gradient(135deg,rgba(74,90,232,0.2),rgba(107,127,255,0.1))}
+.turn-indicator.resolve .countdown{color:#6b7fff}
+.turn-indicator.urgent{animation:urgentPulse 0.5s infinite}
+@keyframes urgentPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+
+.arena{position:relative;overflow:hidden;background:radial-gradient(ellipse at 50% 50%,rgba(255,215,0,0.08) 0%,transparent 40%),linear-gradient(180deg,rgba(255,71,87,0.15) 0%,rgba(255,71,87,0.05) 25%,rgba(255,215,0,0.08) 45%,rgba(255,215,0,0.08) 55%,rgba(46,204,113,0.05) 75%,rgba(46,204,113,0.15) 100%)}
+.arena::before{content:'';position:absolute;top:50%;right:0;left:0;height:3px;background:linear-gradient(90deg,transparent,rgba(255,215,0,0.7),transparent);transform:translateY(-50%);z-index:1;box-shadow:0 0 15px rgba(255,215,0,0.6)}
+.arena::after{content:'🧑 العملاء';position:absolute;top:50%;right:50%;transform:translate(50%,-50%);font-size:10px;opacity:0.6;z-index:1;letter-spacing:2px;background:rgba(0,0,0,0.4);padding:3px 12px;border-radius:10px;border:1px solid rgba(255,215,0,0.4);color:#ffd700;font-weight:900}
+.arena.deploying{cursor:crosshair}
+.player-zone-marker{position:absolute;right:0;left:0;bottom:0;height:50%;pointer-events:none;display:none;z-index:1;background:repeating-linear-gradient(45deg,rgba(46,204,113,0.08),rgba(46,204,113,0.08) 15px,rgba(46,204,113,0.15) 15px,rgba(46,204,113,0.15) 30px);border-top:2px dashed rgba(46,204,113,0.6)}
+.arena.deploying .player-zone-marker{display:block;animation:zoneGlow 1s infinite alternate}
+@keyframes zoneGlow{from{opacity:0.7}to{opacity:1}}
+
+.base{position:absolute;right:50%;transform:translateX(50%);width:clamp(80px,20vw,120px);height:clamp(90px,22vw,130px);display:flex;align-items:flex-end;justify-content:center;z-index:2}
+.base.enemy{top:1%}
+.base.player{bottom:1%}
+.base-building{width:100%;height:100%;position:relative;filter:drop-shadow(0 6px 12px rgba(0,0,0,0.7));transition:transform 0.2s}
+.base.damaged .base-building{animation:buildingShake 0.4s}
+@keyframes buildingShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-4px) rotate(-1deg)}40%{transform:translateX(4px) rotate(1deg)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
+
+.unit{position:absolute;width:clamp(36px,9vw,50px);height:clamp(42px,10vw,58px);display:flex;align-items:center;justify-content:center;z-index:3;transition:transform 0.15s;will-change:top,right}
+.unit .unit-body{width:100%;height:100%;border-radius:50% 50% 45% 45%;display:flex;align-items:center;justify-content:center;position:relative;box-shadow:0 4px 10px rgba(0,0,0,0.5),inset 0 2px 6px rgba(255,255,255,0.2);border:2px solid;animation:unitBounce 1s ease-in-out infinite}
+@keyframes unitBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+.unit .emoji{font-size:clamp(20px,5.5vw,28px);filter:drop-shadow(0 2px 3px rgba(0,0,0,0.6))}
+.unit.player .unit-body{background:radial-gradient(circle at 30% 30%,#3ee68a,#1a8d4a);border-color:#2ecc71;box-shadow:0 0 14px rgba(46,204,113,0.6),0 4px 10px rgba(0,0,0,0.5),inset 0 2px 6px rgba(255,255,255,0.3)}
+.unit.enemy .unit-body{background:radial-gradient(circle at 30% 30%,#ff7a8a,#b51e30);border-color:#ff4757;box-shadow:0 0 14px rgba(255,71,87,0.6),0 4px 10px rgba(0,0,0,0.5),inset 0 2px 6px rgba(255,255,255,0.3)}
+.unit.customer .unit-body{background:radial-gradient(circle at 30% 30%,#ffe066,#b58a00);border-color:#ffd700;box-shadow:0 0 12px rgba(255,215,0,0.5),0 3px 8px rgba(0,0,0,0.4);animation:customerFloat 2s ease-in-out infinite}
+@keyframes customerFloat{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-4px) rotate(3deg)}}
+.unit.launching .unit-body{animation:launch 0.3s ease-out}
+@keyframes launch{0%{transform:scale(1)}50%{transform:scale(1.3);box-shadow:0 0 30px currentColor}100%{transform:scale(1)}}
+.unit.dying{animation:failMarket 0.6s forwards}
+@keyframes failMarket{0%{opacity:1}100%{transform:scale(0.5) translateY(20px);opacity:0;filter:grayscale(1)}}
+.unit.ghost .unit-body{opacity:0.55;filter:grayscale(0.3);animation:ghostPulse 1s ease-in-out infinite}
+@keyframes ghostPulse{0%,100%{opacity:0.4}50%{opacity:0.7}}
+.unit .mv-mini{position:absolute;bottom:-8px;right:-2px;left:-2px;height:4px;background:rgba(0,0,0,0.7);border-radius:2px;overflow:hidden;border:1px solid rgba(0,0,0,0.4)}
+.unit .mv-mini::after{content:'';display:block;height:100%;background:linear-gradient(90deg,#2ecc71,#1abc9c);width:var(--mv,100%);transition:width 0.2s}
+.unit.enemy .mv-mini::after{background:linear-gradient(90deg,#ff4757,#ff6b6b)}
+
+.impact-popup{position:absolute;font-weight:900;font-size:14px;color:#ff4757;text-shadow:0 2px 4px #000,0 0 10px #ff4757;pointer-events:none;animation:impactPop 0.9s ease-out forwards;z-index:10;white-space:nowrap}
+.impact-popup.gain{color:#2ecc71;text-shadow:0 2px 4px #000,0 0 10px #2ecc71}
+.impact-popup.money{color:#ffd700;text-shadow:0 2px 4px #000,0 0 10px #ffd700}
+@keyframes impactPop{0%{transform:translateY(0) scale(0.5);opacity:0}20%{transform:translateY(-5px) scale(1.3);opacity:1}100%{transform:translateY(-40px) scale(1);opacity:0}}
+
+.coin-fx{position:absolute;font-size:20px;pointer-events:none;animation:coinFly 1.2s ease-out forwards;z-index:10;filter:drop-shadow(0 0 8px rgba(255,215,0,0.8))}
+@keyframes coinFly{0%{transform:translateY(0) scale(0.5) rotate(0);opacity:0}30%{opacity:1;transform:translateY(-15px) scale(1.3) rotate(180deg)}100%{transform:translateY(-50px) scale(1) rotate(360deg);opacity:0}}
+
+.market-ring{position:absolute;width:0;height:0;border:3px solid;border-radius:50%;pointer-events:none;z-index:9;animation:marketRing 0.7s ease-out forwards}
+.market-ring.player{border-color:#2ecc71;box-shadow:0 0 15px #2ecc71,inset 0 0 15px #2ecc71}
+.market-ring.enemy{border-color:#ff4757;box-shadow:0 0 15px #ff4757,inset 0 0 15px #ff4757}
+@keyframes marketRing{0%{width:0;height:0;opacity:1}100%{width:90px;height:90px;margin:-45px;opacity:0}}
+
+.chart-fx{position:absolute;pointer-events:none;z-index:10;font-size:20px;animation:chartPop 0.6s ease-out forwards;filter:drop-shadow(0 0 8px currentColor)}
+@keyframes chartPop{0%{transform:scale(0);opacity:0}40%{transform:scale(1.5);opacity:1}100%{transform:scale(1) translateY(-20px);opacity:0}}
+
+.particle{position:absolute;width:6px;height:6px;border-radius:50%;pointer-events:none;z-index:8;animation:particle 0.8s ease-out forwards}
+@keyframes particle{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--dx,0),var(--dy,0)) scale(0);opacity:0}}
+@keyframes screenShake{0%,100%{transform:translate(0,0)}25%{transform:translate(-3px,2px)}50%{transform:translate(3px,-2px)}75%{transform:translate(-2px,-2px)}}
+.arena.shake{animation:screenShake 0.3s}
+
+.customer-trail{position:absolute;height:2px;background:linear-gradient(90deg,transparent,#ffd700,transparent);pointer-events:none;z-index:7;transform-origin:right center;animation:trailFade 0.8s forwards;box-shadow:0 0 6px #ffd700}
+@keyframes trailFade{0%{opacity:0}30%{opacity:1}100%{opacity:0}}
+
+.bottom-bar{background:linear-gradient(180deg,rgba(0,0,0,0.4),rgba(0,0,0,0.7));backdrop-filter:blur(14px);padding:8px 8px 10px;border-top:1px solid rgba(255,215,0,0.2);z-index:50}
+.action-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;padding:0 2px}
+.bank-display{flex:1;display:flex;align-items:center;gap:8px;padding:6px 10px;background:linear-gradient(135deg,rgba(46,204,113,0.2),rgba(46,204,113,0.08));border:1px solid rgba(46,204,113,0.4);border-radius:10px}
+.bank-display .bank-label{font-size:11px;opacity:0.85;font-weight:700}
+.bank-display .bank-amount{font-size:15px;font-weight:900;color:#3ee68a;text-shadow:0 2px 4px rgba(0,0,0,0.6);font-variant-numeric:tabular-nums;flex:1;text-align:center}
+.bank-display .bank-amount .currency{font-size:10px;opacity:0.75;margin-right:2px}
+.end-turn-btn{background:linear-gradient(135deg,#4a5ae8,#6b7fff);color:#fff;border:none;padding:8px 14px;font-weight:900;font-size:13px;border-radius:10px;cursor:pointer;font-family:inherit;box-shadow:0 4px 10px rgba(74,90,232,0.4);white-space:nowrap}
+.end-turn-btn:active{transform:scale(0.95)}
+.end-turn-btn:disabled{opacity:0.4;cursor:not-allowed}
+
+.cards-wrap{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:2px}
+.cards-wrap::-webkit-scrollbar{display:none}
+.cards-row{display:flex;gap:6px;min-width:min-content}
+.card{background:linear-gradient(180deg,#2a2f5e 0%,#1a1f4e 50%,#141a3e 100%);border:2px solid rgba(255,255,255,0.15);border-radius:12px;padding:4px 3px 3px;position:relative;cursor:pointer;text-align:center;transition:transform 0.15s,box-shadow 0.15s,border-color 0.15s;min-height:140px;width:clamp(72px,21vw,96px);display:flex;flex-direction:column;justify-content:space-between;align-items:center;box-shadow:0 4px 10px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.1);flex:0 0 auto}
+.card::before{content:'';position:absolute;top:0;right:0;left:0;height:30%;background:linear-gradient(180deg,rgba(255,255,255,0.12),transparent);border-radius:10px 10px 0 0;pointer-events:none}
+.card:active:not(.disabled){transform:scale(0.94)}
+.card.affordable{border-color:#ffd700;box-shadow:0 0 14px rgba(255,215,0,0.5),0 4px 10px rgba(0,0,0,0.4)}
+.card.disabled{opacity:0.45;cursor:not-allowed;filter:grayscale(0.7)}
+.card.selected{border-color:#2ecc71;box-shadow:0 0 20px rgba(46,204,113,0.9),0 4px 10px rgba(0,0,0,0.4);transform:translateY(-6px);animation:selectedPulse 0.8s ease-in-out infinite alternate}
+@keyframes selectedPulse{from{box-shadow:0 0 16px rgba(46,204,113,0.6),0 4px 10px rgba(0,0,0,0.4)}to{box-shadow:0 0 24px rgba(46,204,113,1),0 4px 14px rgba(0,0,0,0.5)}}
+.card .emoji-wrap{width:38px;height:38px;margin-top:4px;border-radius:50%;background:radial-gradient(circle at 30% 30%,rgba(255,255,255,0.25),rgba(0,0,0,0.2));display:flex;align-items:center;justify-content:center;box-shadow:inset 0 2px 4px rgba(0,0,0,0.3)}
+.card .emoji{font-size:clamp(20px,5vw,26px);filter:drop-shadow(0 2px 3px rgba(0,0,0,0.6))}
+.card .name{font-size:clamp(9px,2.3vw,11px);font-weight:900;line-height:1.1;margin-top:2px}
+.card .desc{font-size:clamp(7px,1.8vw,9px);opacity:0.85;line-height:1.15;padding:2px 3px;background:rgba(0,0,0,0.35);border-radius:6px;margin-top:3px;width:100%;min-height:24px;display:flex;align-items:center;justify-content:center}
+.card .cost{position:absolute;top:-7px;right:-7px;background:linear-gradient(135deg,#ff6b35,#ffd700);color:#0a0e27;min-width:34px;height:22px;padding:0 5px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;border:2px solid #0a0e27;box-shadow:0 2px 6px rgba(255,215,0,0.5);white-space:nowrap}
+.card .cost .c{font-size:8px;margin-right:1px;opacity:0.8}
+
+.modal{position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;z-index:1000;padding:20px}
+.modal.active{display:flex;animation:modalIn 0.3s}
+@keyframes modalIn{from{opacity:0}to{opacity:1}}
+.modal-box{background:linear-gradient(135deg,#1a1f4e,#2a2f5e);border:2px solid rgba(255,215,0,0.4);border-radius:20px;padding:22px;max-width:460px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.7),0 0 40px rgba(255,215,0,0.2);max-height:92vh;overflow-y:auto;animation:boxIn 0.4s cubic-bezier(0.2,0.8,0.2,1)}
+@keyframes boxIn{from{transform:scale(0.7)}to{transform:scale(1)}}
+.modal-box h2{font-size:clamp(22px,5vw,28px);margin-bottom:10px;color:#ffd700;text-shadow:0 2px 6px rgba(255,215,0,0.3)}
+.modal-box p{font-size:clamp(13px,3vw,15px);line-height:1.6;opacity:0.92;margin-bottom:14px}
+
+.mentor-box{background:linear-gradient(135deg,rgba(74,90,232,0.2),rgba(107,127,255,0.1));border:1px solid rgba(74,90,232,0.5);border-radius:14px;padding:14px;margin:14px 0;display:flex;gap:12px;align-items:flex-start;text-align:right;box-shadow:inset 0 2px 0 rgba(255,255,255,0.1)}
+.mentor-avatar{font-size:40px;flex-shrink:0;filter:drop-shadow(0 4px 6px rgba(0,0,0,0.4))}
+.mentor-text{flex:1;font-size:14px;line-height:1.5}
+.mentor-text strong{color:#ffd700;display:block;margin-bottom:4px}
+
+.quarter-report{text-align:right;background:rgba(0,0,0,0.3);border-radius:14px;padding:12px;margin:12px 0;border:1px solid rgba(255,215,0,0.2)}
+.quarter-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;font-size:13px;border-bottom:1px dashed rgba(255,255,255,0.1)}
+.quarter-row:last-child{border-bottom:none}
+.quarter-row .label{opacity:0.9;display:flex;align-items:center;gap:6px}
+.quarter-row .value{font-weight:900;color:#ffd700;font-variant-numeric:tabular-nums}
+.quarter-row.deduction .value{color:#ff6b6b}
+.quarter-row.final{border-top:2px solid #ffd700;padding-top:12px;margin-top:4px;border-bottom:none}
+.quarter-row.final .label{font-weight:900;font-size:15px}
+.quarter-row.final .value{font-size:22px;background:linear-gradient(90deg,#ffd700,#ff6b35);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 10px rgba(255,215,0,0.5))}
+.quarter-row.subtotal{border-top:1px solid rgba(255,255,255,0.2);padding-top:10px;border-bottom:none;font-weight:900}
+.quarter-row.newbalance{background:rgba(46,204,113,0.12);padding:10px;border-radius:8px;margin-top:8px;border:1px solid rgba(46,204,113,0.4)}
+.quarter-row.newbalance .value{color:#3ee68a}
+.currency{font-size:11px;opacity:0.8;margin-right:2px}
+
+.deck-builder{max-width:520px;width:100%}
+.deck-section{margin-bottom:14px}
+.deck-section h3{font-size:15px;margin-bottom:8px;color:#ffd700;text-align:right}
+.cards-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.mini-card{background:linear-gradient(180deg,#2a2f5e,#1a1f4e);border:2px solid rgba(255,255,255,0.1);border-radius:10px;padding:5px 3px;cursor:pointer;aspect-ratio:3/4.5;position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;box-shadow:0 3px 8px rgba(0,0,0,0.3)}
+.mini-card.in-deck{border-color:#2ecc71;background:linear-gradient(180deg,rgba(46,204,113,0.15),rgba(26,140,80,0.1));box-shadow:0 0 10px rgba(46,204,113,0.4),0 3px 8px rgba(0,0,0,0.3)}
+.mini-card.locked{opacity:0.4}
+.mini-card .emoji{font-size:22px;filter:drop-shadow(0 2px 3px rgba(0,0,0,0.5))}
+.mini-card .name{font-size:10px;font-weight:800;line-height:1.1;margin-top:3px}
+.mini-card .desc{font-size:8px;opacity:0.8;line-height:1.2;margin-top:2px;padding:0 2px}
+.mini-card .cost{position:absolute;top:3px;right:3px;background:linear-gradient(135deg,#ff6b35,#ffd700);color:#0a0e27;min-width:30px;padding:0 4px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;border:1px solid #0a0e27}
+
+.leaderboard-list{width:100%;max-width:420px}
+.leader-row{display:grid;grid-template-columns:34px 1fr auto;padding:10px 14px;background:linear-gradient(135deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02));border-radius:12px;margin-bottom:6px;gap:10px;align-items:center;border:1px solid rgba(255,255,255,0.05)}
+.leader-row.me{background:linear-gradient(135deg,rgba(255,215,0,0.2),rgba(255,107,53,0.08));border:1px solid rgba(255,215,0,0.5);box-shadow:0 2px 10px rgba(255,215,0,0.3)}
+.leader-row .rank{font-weight:900;color:#ffd700;text-align:center;font-size:16px}
+.leader-row .score{font-weight:800;color:#2ecc71;font-size:12px}
+
+.close-x{position:absolute;top:12px;left:12px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);color:#fff;width:36px;height:36px;border-radius:50%;font-size:18px;cursor:pointer;font-family:inherit;z-index:10}
+.fs-btn{position:absolute;top:12px;right:12px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);color:#fff;width:36px;height:36px;border-radius:50%;font-size:16px;cursor:pointer;font-family:inherit;z-index:10}
+
+.toast{position:fixed;top:20px;right:50%;transform:translateX(50%);background:linear-gradient(135deg,#2ecc71,#1abc9c);color:#fff;padding:10px 22px;border-radius:25px;font-weight:800;font-size:14px;z-index:2000;box-shadow:0 6px 20px rgba(46,204,113,0.5);opacity:0;transition:opacity 0.3s,top 0.3s;pointer-events:none;max-width:90%}
+.toast.show{opacity:1;top:50px}
+.toast.warn{background:linear-gradient(135deg,#ff6b35,#ffd700);color:#0a0e27}
+.toast.err{background:linear-gradient(135deg,#ff4757,#ff6b6b)}
+
+.tutorial-overlay{position:fixed;inset:0;z-index:5000;background:rgba(0,0,0,0.75);display:none;align-items:flex-end;justify-content:center;padding:16px;backdrop-filter:blur(2px)}
+.tutorial-overlay.active{display:flex;animation:modalIn 0.3s}
+.tutorial-bubble{background:linear-gradient(135deg,#1a1f4e,#2a2f5e);border:2px solid #ffd700;border-radius:18px;padding:18px;max-width:420px;width:100%;box-shadow:0 20px 50px rgba(0,0,0,0.6),0 0 30px rgba(255,215,0,0.3);z-index:5001;position:relative;animation:bubbleIn 0.4s cubic-bezier(0.2,0.8,0.2,1)}
+@keyframes bubbleIn{from{transform:translateY(40px) scale(0.8);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
+.tutorial-header{display:flex;align-items:center;gap:10px;margin-bottom:10px;border-bottom:1px solid rgba(255,215,0,0.2);padding-bottom:10px}
+.tutorial-avatar{width:50px;height:50px;background:linear-gradient(135deg,#4a5ae8,#6b7fff);border:2px solid #ffd700;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:0 4px 10px rgba(74,90,232,0.5);animation:avatarBob 2s ease-in-out infinite}
+@keyframes avatarBob{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-3px) rotate(3deg)}}
+.tutorial-name{font-weight:900;color:#ffd700;font-size:14px}
+.tutorial-role{font-size:11px;opacity:0.7}
+.tutorial-text{font-size:14px;line-height:1.7;margin-bottom:12px;text-align:right}
+.tutorial-text strong{color:#ffd700}
+.tutorial-text .tip{display:block;background:rgba(74,90,232,0.15);padding:8px 12px;border-radius:10px;margin-top:8px;font-size:13px;border-right:3px solid #6b7fff}
+.tutorial-actions{display:flex;gap:8px;justify-content:flex-end}
+.tutorial-btn{background:linear-gradient(135deg,#ff6b35,#ffd700);color:#0a0e27;border:none;padding:10px 22px;font-weight:900;font-size:14px;border-radius:10px;cursor:pointer;font-family:inherit;box-shadow:0 4px 10px rgba(255,107,53,0.4)}
+.tutorial-btn.skip{background:rgba(255,255,255,0.1);color:#fff;font-weight:700}
+.tutorial-step{font-size:11px;color:#ffd700;font-weight:700;opacity:0.7}
+
+@supports (padding:max(0px)){.top-bar{padding-top:max(8px,env(safe-area-inset-top))}.bottom-bar{padding-bottom:max(10px,env(safe-area-inset-bottom))}}
+@media (max-height:640px){.card{min-height:125px}.card .desc{min-height:20px;font-size:7px}.logo{margin-bottom:2px}}
+
+.selector-hint{text-align:center;font-size:11px;color:#ffd700;min-height:14px;font-weight:700;padding:2px 0}
+.help-section{background:linear-gradient(135deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02));padding:14px;border-radius:12px;margin-bottom:10px;border:1px solid rgba(255,255,255,0.08)}
+.help-section strong{color:#ffd700}
+.help-section p{margin-top:6px;font-size:14px;line-height:1.7}
+
+.enemy-thinking{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:4}
+.enemy-thinking .bubble{background:linear-gradient(135deg,rgba(255,71,87,0.95),rgba(255,107,107,0.95));color:#fff;padding:14px 24px;border-radius:20px;font-weight:900;font-size:16px;box-shadow:0 10px 30px rgba(255,71,87,0.5);animation:bubbleIn 0.4s;border:2px solid rgba(255,255,255,0.2)}
+
+.sound-section{margin:14px 0;text-align:right}
+.sound-section-title{font-size:13px;color:#ffd700;margin-bottom:8px;font-weight:800}
+.sound-toggles{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sound-toggle{background:rgba(255,255,255,0.06);border:2px solid rgba(255,255,255,0.15);border-radius:12px;padding:10px;color:#fff;cursor:pointer;font-family:inherit;transition:all 0.2s;text-align:center}
+.sound-toggle:active{transform:scale(0.95)}
+.sound-toggle.active{background:linear-gradient(135deg,rgba(46,204,113,0.35),rgba(26,188,156,0.2));border-color:#2ecc71;box-shadow:0 0 12px rgba(46,204,113,0.4)}
+.sound-toggle .st-icon{font-size:24px;margin-bottom:4px}
+.sound-toggle .st-label{font-size:12px;font-weight:700}
+.sound-toggle .st-state{font-size:11px;opacity:0.8;margin-top:2px;color:#2ecc71}
+.sound-toggle:not(.active) .st-state{color:#ff6b6b;opacity:0.7}
+
+.theme-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.theme-btn{background:rgba(255,255,255,0.06);border:2px solid rgba(255,255,255,0.15);border-radius:12px;padding:10px 8px;color:#fff;cursor:pointer;font-family:inherit;transition:all 0.2s;text-align:center}
+.theme-btn:active{transform:scale(0.95)}
+.theme-btn.selected{background:linear-gradient(135deg,rgba(255,215,0,0.3),rgba(255,107,53,0.15));border-color:#ffd700;box-shadow:0 0 14px rgba(255,215,0,0.5)}
+.theme-btn .t-emoji{font-size:28px;margin-bottom:3px}
+.theme-btn .t-name{font-size:12px;font-weight:900;color:#ffd700}
+.theme-btn .t-desc{font-size:9px;opacity:0.7;margin-top:2px;line-height:1.2}
+
+.volume-slider{width:100%;-webkit-appearance:none;appearance:none;height:8px;border-radius:4px;background:rgba(255,255,255,0.1);outline:none;cursor:pointer}
+.volume-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#ffd700,#ff6b35);cursor:pointer;box-shadow:0 2px 8px rgba(255,215,0,0.5);border:2px solid #0a0e27}
+.volume-slider::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#ffd700,#ff6b35);cursor:pointer;box-shadow:0 2px 8px rgba(255,215,0,0.5);border:2px solid #0a0e27}
+
+.sound-btn-menu{margin-top:6px}
+
+/* ===== الساحة المحسّنة - سوق حيوي ===== */
+.arena{
+  background:
+    /* ضوء سماوي علوي */
+    radial-gradient(ellipse at 50% -10%, rgba(255,71,87,0.2), transparent 40%),
+    /* ضوء أرضي سفلي */
+    radial-gradient(ellipse at 50% 110%, rgba(46,204,113,0.2), transparent 40%),
+    /* منطقة العملاء الذهبية */
+    radial-gradient(ellipse at 50% 50%, rgba(255,215,0,0.12) 0%, transparent 35%),
+    /* خلفية طبقات المدينة */
+    linear-gradient(180deg,
+      rgba(255,71,87,0.1) 0%,
+      rgba(26,31,78,0.35) 15%,
+      rgba(26,31,78,0.5) 45%,
+      rgba(26,31,78,0.5) 55%,
+      rgba(10,107,61,0.35) 85%,
+      rgba(46,204,113,0.1) 100%);
+}
+
+/* خطوط منظور أرضية (تعطي شعور العمق) */
+.arena-floor{
+  position:absolute;inset:50% 0 0 0;height:50%;
+  pointer-events:none;z-index:0;opacity:0.35;
+  background:
+    linear-gradient(90deg, transparent 49%, rgba(46,204,113,0.25) 50%, transparent 51%),
+    linear-gradient(90deg, transparent 24%, rgba(46,204,113,0.12) 25%, transparent 26%,
+                     transparent 74%, rgba(46,204,113,0.12) 75%, transparent 76%),
+    linear-gradient(180deg, transparent, rgba(46,204,113,0.08));
+}
+.arena-skyline{
+  position:absolute;top:0;right:0;left:0;height:50%;
+  pointer-events:none;z-index:0;opacity:0.5;
+}
+.arena-skyline svg{width:100%;height:100%;display:block}
+
+/* أضواء جانبية - مصابيح السوق */
+.lamp{position:absolute;pointer-events:none;z-index:1;opacity:0.8}
+.lamp::before{content:'';position:absolute;width:8px;height:8px;background:#ffd700;border-radius:50%;box-shadow:0 0 15px 4px rgba(255,215,0,0.6);animation:lampFlicker 3s infinite alternate;top:6px;right:5px}
+.lamp::after{content:'';position:absolute;width:3px;height:40px;background:linear-gradient(#666,#333);top:14px;right:9px}
+.lamp.lamp-tl{top:56px;right:8px}
+.lamp.lamp-tr{top:56px;left:8px}
+.lamp.lamp-bl{bottom:50px;right:8px;transform:rotate(180deg)}
+.lamp.lamp-br{bottom:50px;left:8px;transform:rotate(180deg)}
+@keyframes lampFlicker{0%,100%{opacity:1}90%{opacity:0.85}}
+
+/* منصة المقر - تعطي شعور المبنى واقف على قاعدة */
+.base::before{
+  content:'';position:absolute;bottom:-2px;right:50%;transform:translateX(50%);
+  width:115%;height:8px;background:radial-gradient(ellipse at center, rgba(0,0,0,0.6), transparent 70%);
+  pointer-events:none;
+}
+.base.player::after{
+  content:'';position:absolute;bottom:0;right:50%;transform:translateX(50%);
+  width:130%;height:14px;z-index:-1;
+  background:radial-gradient(ellipse at center,rgba(46,204,113,0.4),transparent 60%);
+  border-radius:50%;animation:baseGlow 2s infinite alternate;
+}
+.base.enemy::after{
+  content:'';position:absolute;top:0;right:50%;transform:translateX(50%);
+  width:130%;height:14px;z-index:-1;
+  background:radial-gradient(ellipse at center,rgba(255,71,87,0.4),transparent 60%);
+  border-radius:50%;animation:baseGlow 2s infinite alternate;
+}
+@keyframes baseGlow{from{opacity:0.5}to{opacity:1}}
+
+/* ===== العملاء المتنوعون ===== */
+.unit.customer .unit-body{
+  background:radial-gradient(circle at 30% 30%, var(--c-color, #ffe066), rgba(0,0,0,0.3));
+  border-color:var(--c-color, #ffd700);
+  box-shadow:0 0 12px var(--c-color, rgba(255,215,0,0.5)), 0 3px 8px rgba(0,0,0,0.4);
+}
+.unit.customer{transform:scale(var(--c-size, 1));}
+.unit.customer .c-value{
+  position:absolute;top:-16px;right:50%;transform:translateX(50%);
+  background:rgba(0,0,0,0.8);color:#ffd700;font-size:9px;font-weight:900;
+  padding:1px 6px;border-radius:6px;white-space:nowrap;
+  border:1px solid rgba(255,215,0,0.5);pointer-events:none;
+  text-shadow:0 1px 2px rgba(0,0,0,0.8);
+}
+.unit.customer .c-crown{
+  position:absolute;top:-8px;right:-4px;color:#ffd700;
+  font-size:14px;animation:crownSpin 2s infinite;
+  filter:drop-shadow(0 0 4px #ffd700);pointer-events:none;
+}
+@keyframes crownSpin{0%,100%{transform:rotate(-15deg) scale(1)}50%{transform:rotate(15deg) scale(1.2)}}
+.unit.customer.type-vip .unit-body,
+.unit.customer.type-whale .unit-body{
+  animation:vipPulse 1s infinite alternate;
+}
+@keyframes vipPulse{
+  from{box-shadow:0 0 12px var(--c-color), 0 3px 8px rgba(0,0,0,0.4)}
+  to{box-shadow:0 0 25px var(--c-color), 0 3px 14px rgba(0,0,0,0.5)}
+}
+
+/* ===== بانر حدث السوق ===== */
+.market-event-banner{
+  position:absolute;top:50%;right:50%;
+  transform:translate(50%, -50%) scale(0);
+  background:linear-gradient(135deg, rgba(26,31,78,0.98), rgba(42,47,94,0.98));
+  border:3px solid var(--ev-color, #ffd700);
+  border-radius:16px;padding:14px 18px;
+  max-width:85%;min-width:240px;
+  z-index:100;text-align:right;
+  box-shadow:0 15px 50px rgba(0,0,0,0.7), 0 0 40px var(--ev-color, rgba(255,215,0,0.3));
+  display:flex;gap:12px;align-items:center;
+  animation:eventIn 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+.market-event-banner.dismiss{animation:eventOut 0.5s forwards}
+@keyframes eventIn{
+  0%{transform:translate(50%, -50%) scale(0) rotate(-20deg);opacity:0}
+  60%{transform:translate(50%, -50%) scale(1.1) rotate(3deg);opacity:1}
+  100%{transform:translate(50%, -50%) scale(1) rotate(0);opacity:1}
+}
+@keyframes eventOut{to{transform:translate(50%, -50%) scale(0.8);opacity:0}}
+.market-event-banner .me-emoji{font-size:44px;filter:drop-shadow(0 4px 8px rgba(0,0,0,0.5))}
+.market-event-banner .me-label{font-size:10px;color:var(--ev-color, #ffd700);font-weight:900;opacity:0.9;letter-spacing:2px}
+.market-event-banner .me-name{font-size:17px;font-weight:900;color:#fff;margin:2px 0;text-shadow:0 0 10px var(--ev-color)}
+.market-event-banner .me-desc{font-size:11px;opacity:0.85;line-height:1.4}
+
+/* مؤشر الحدث الدائم */
+.sub-pill.event-indicator{
+  background:linear-gradient(135deg, var(--ev-color, rgba(107,127,255,0.3)), rgba(0,0,0,0.3));
+  border-color:var(--ev-color, rgba(107,127,255,0.5));
+  color:#fff;font-weight:900;
+  animation:eventPillPulse 2s infinite alternate;
+}
+@keyframes eventPillPulse{
+  from{box-shadow:0 0 5px var(--ev-color)}
+  to{box-shadow:0 0 12px var(--ev-color)}
+}
+.sub-pill.event-indicator .ev-dot{font-size:14px}
+.sub-pill.event-indicator .ev-name{font-size:11px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* تمييز البطاقات بخصم الحدث */
+.card.event-discount{border-color:#6b7fff !important;animation:discountPulse 1.5s infinite alternate}
+@keyframes discountPulse{from{box-shadow:0 0 10px rgba(107,127,255,0.4),0 4px 10px rgba(0,0,0,0.4)}to{box-shadow:0 0 20px rgba(107,127,255,0.9),0 4px 10px rgba(0,0,0,0.4)}}
+.card .evt-mark{position:absolute;top:-1px;right:-1px;font-size:8px;animation:sparkle 1s infinite}
+@keyframes sparkle{0%,100%{opacity:1}50%{opacity:0.3}}
+
+/* ===== مناطق السوق الثابتة ===== */
+.market-zones-layer{position:absolute;top:40%;height:20%;right:0;left:0;pointer-events:none;z-index:1}
+.market-zone{
+  position:absolute;top:0;bottom:0;
+  border-right:1px dashed rgba(255,255,255,0.15);
+  border-left:1px dashed rgba(255,255,255,0.15);
+  transition:all 0.4s ease;
+  overflow:hidden;
+}
+.market-zone .zone-label{
+  position:absolute;top:-18px;right:50%;transform:translateX(50%);
+  font-size:10px;font-weight:900;color:var(--z-color);
+  background:rgba(0,0,0,0.55);padding:2px 9px;border-radius:8px;
+  border:1px solid var(--z-color);white-space:nowrap;opacity:0.6;
+  transition:opacity 0.3s, transform 0.3s;
+}
+.market-zone .zone-glow{
+  position:absolute;inset:0;
+  background:linear-gradient(180deg, transparent, var(--z-color), transparent);
+  opacity:0;transition:opacity 0.5s;
+}
+.market-zone.active{border-color:var(--z-color)}
+.market-zone.active .zone-label{opacity:1;transform:translateX(50%) scale(1.1);box-shadow:0 2px 10px var(--z-color)}
+.market-zone.active .zone-glow{opacity:0.15;animation:zoneActivePulse 2s infinite alternate}
+@keyframes zoneActivePulse{from{opacity:0.1}to{opacity:0.25}}
+
+/* ===== البوابات ===== */
+.portal{
+  position:absolute;top:37%;
+  transform:translate(50%, -50%);
+  width:36px;height:32px;
+  pointer-events:none;z-index:2;
+  transition:all 0.3s;opacity:0.35;
+}
+.portal.active{opacity:1}
+.portal .portal-arch{
+  position:absolute;inset:0;
+  border:2px solid var(--p-color);
+  border-radius:50% 50% 0 0 / 70% 70% 0 0;
+  background:linear-gradient(180deg, rgba(0,0,0,0.6), transparent);
+  box-shadow:0 0 8px var(--p-color);
+}
+.portal .portal-icon{
+  position:absolute;top:50%;right:50%;transform:translate(50%,-50%);
+  font-size:16px;filter:drop-shadow(0 2px 3px rgba(0,0,0,0.8));
+}
+.portal.incoming{opacity:1;animation:portalPulse 0.5s infinite alternate}
+@keyframes portalPulse{
+  from{box-shadow:0 0 10px var(--p-color);transform:translate(50%,-50%) scale(1)}
+  to{box-shadow:0 0 30px var(--p-color);transform:translate(50%,-50%) scale(1.15)}
+}
+.portal.open .portal-arch{animation:portalOpen 0.6s}
+@keyframes portalOpen{
+  0%{transform:scale(1)}
+  50%{transform:scale(1.4);background:var(--p-color)}
+  100%{transform:scale(1)}
+}
+
+/* عميل قادم - شبح عند البوابة */
+.incoming-ghost{
+  position:absolute;top:100%;right:50%;transform:translateX(50%);
+  margin-top:4px;font-size:22px;
+  color:var(--c-color, #ffd700);
+  filter:drop-shadow(0 0 6px var(--c-color, #ffd700));
+  animation:ghostBob 0.6s infinite alternate;
+  opacity:0.9;text-align:center;line-height:1;
+}
+.incoming-ghost .arrow{font-size:14px;color:var(--c-color);margin-top:2px;animation:arrowBounce 0.4s infinite alternate}
+@keyframes ghostBob{from{opacity:0.6;transform:translateX(50%) translateY(0)}to{opacity:1;transform:translateX(50%) translateY(-3px)}}
+@keyframes arrowBounce{from{transform:translateY(0)}to{transform:translateY(4px)}}
+
+/* تأثير خروج العميل من البوابة */
+.unit.customer.emerging{animation:customerEmerge 0.4s}
+@keyframes customerEmerge{
+  0%{transform:translate(50%,-50%) scale(0);opacity:0}
+  100%{transform:translate(50%,-50%) scale(var(--c-size, 1));opacity:1}
+}
+
+/* ===== شريط التقويم ===== */
+.forecast-bar{
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;
+  padding:4px 10px;margin-bottom:4px;
+  background:linear-gradient(135deg, rgba(107,127,255,0.15), rgba(255,215,0,0.08));
+  border:1px solid rgba(107,127,255,0.3);border-radius:12px;
+  font-size:11px;font-weight:700;min-height:28px;
+}
+.forecast-bar .fc-label{color:#ffd700;font-weight:900}
+.forecast-bar .fc-zone{
+  display:inline-flex;align-items:center;gap:4px;
+  background:rgba(0,0,0,0.3);padding:2px 8px;border-radius:10px;
+  border:1px solid var(--z-color);
+}
+.forecast-bar .fc-icons{font-size:14px;letter-spacing:1px}
+
+</style>
+</head>
+<body>
+
+<div id="game">
+
+  <div class="screen active" id="menuScreen">
+    <button class="fs-btn" onclick="UI.toggleFullscreen()" title="ملء الشاشة">⛶</button>
+    <div class="logo">حرب الابتكار</div>
+    <div class="subtitle">🚀<span class="sep">·</span>سباق ريادة الأعمال<span class="sep">·</span>📈</div>
+
+    <div class="company-dashboard">
+      <div class="dash-tile bank">
+        <div class="dash-label">🏦 رصيد الشركة</div>
+        <div class="dash-value"><span id="menuBank">2,000</span> <span class="currency" style="font-size:11px;opacity:0.7;">ر.س</span></div>
+      </div>
+      <div class="dash-tile customers">
+        <div class="dash-label">🧑 إجمالي العملاء</div>
+        <div class="dash-value" id="menuCustomers">0</div>
+      </div>
+      <div class="dash-tile recurring">
+        <div class="dash-label">📈 إيراد متكرر/ربع</div>
+        <div class="dash-value"><span id="menuRecurring">0</span> <span class="currency" style="font-size:11px;opacity:0.7;">ر.س</span></div>
+      </div>
+      <div class="dash-tile rank">
+        <div class="dash-label">🏆 المستوى والرتبة</div>
+        <div class="dash-value"><span id="menuLevel">1</span> · <span id="menuRank">مبتدئ</span></div>
+      </div>
+    </div>
+
+    <div class="diff-label">🎯 مستوى الصعوبة</div>
+    <div class="difficulty-selector" id="difficultySelector">
+      <button class="diff-btn easy" data-diff="easy" onclick="UI.setDifficulty('easy')">🌱 سهل</button>
+      <button class="diff-btn medium" data-diff="medium" onclick="UI.setDifficulty('medium')">⚖️ متوسط</button>
+      <button class="diff-btn hard" data-diff="hard" onclick="UI.setDifficulty('hard')">🔥 صعب</button>
+    </div>
+
+    <button class="btn" onclick="UI.startBattle()">🚀 ابدأ المنافسة</button>
+    <button class="btn secondary" onclick="UI.openDeck()">🎴 ترتيب المبادرات</button>
+    <button class="btn secondary" onclick="UI.openLevels()">🗺️ خريطة الـ 100 منافس</button>
+    <button class="btn ghost" onclick="UI.openLeaderboard()">📊 تصنيف الرواد</button>
+    <button class="btn ghost" onclick="UI.openSoundSettings()">🎵 إعدادات الصوت</button>
+    <button class="btn ghost" onclick="UI.openHelp()">❓ كيف ألعب</button>
+    <button class="btn ghost" onclick="UI.toggleFullscreen()">⛶ ملء الشاشة</button>
+    <button class="btn ghost small" onclick="UI.resetGame()" style="margin-top:10px;opacity:0.5;">♻️ إعادة ضبط التقدم</button>
+  </div>
+
+  <div class="screen" id="battleScreen">
+    <div class="battle-layout">
+      <div class="top-bar">
+        <div class="info">
+          <span>🏢 <span id="enemyName">المنافس</span></span>
+          <div class="mv-bar-wrap">
+            <div class="mv-bar enemy" id="enemyMv" style="width:100%"></div>
+            <div class="mv-label" id="enemyMvLabel">100</div>
+          </div>
+        </div>
+        <div class="turn-indicator" id="turnIndicator">
+          <div class="phase-label" id="phaseLabel">دورك</div>
+          <div class="countdown" id="countdown">20</div>
+        </div>
+        <div class="info">
+          <div class="mv-bar-wrap">
+            <div class="mv-bar player" id="playerMv" style="width:100%"></div>
+            <div class="mv-label" id="playerMvLabel">100</div>
+          </div>
+          <span>🏢 شركتي</span>
+        </div>
+      </div>
+
+      <div class="sub-bar">
+        <div class="sub-pill quarter">📊 <span id="quarterLabel">الربع الأول</span></div>
+        <div class="sub-pill month">📅 <span id="monthLabel">يناير</span> (<span id="monthNum">1</span>/3)</div>
+        <div class="sub-pill customers">🧑 <span id="customersCount">0</span></div>
+        <div class="sub-pill event-indicator" id="eventIndicator" style="display:none;"></div>
+      </div>
+
+      <div class="arena" id="arena">
+        <div class="arena-skyline">
+          <svg viewBox="0 0 400 100" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#ff4757" stop-opacity="0.2"/>
+                <stop offset="100%" stop-color="#1a1f4e" stop-opacity="0.5"/>
+              </linearGradient>
+            </defs>
+            <!-- مدينة في الخلفية -->
+            <path d="M0,100 L0,60 L15,60 L15,40 L25,40 L25,55 L40,55 L40,30 L55,30 L55,20 L70,20 L70,45 L85,45 L85,25 L100,25 L100,50 L115,50 L115,35 L130,35 L130,55 L145,55 L145,28 L160,28 L160,42 L175,42 L175,55 L190,55 L190,38 L205,38 L205,20 L220,20 L220,45 L235,45 L235,30 L250,30 L250,50 L265,50 L265,22 L280,22 L280,48 L295,48 L295,35 L310,35 L310,55 L325,55 L325,28 L340,28 L340,42 L355,42 L355,58 L370,58 L370,40 L385,40 L385,55 L400,55 L400,100 Z"
+                  fill="url(#skyGrad)"/>
+            <!-- نوافذ مضيئة -->
+            <g fill="#ffd700" opacity="0.4">
+              <rect x="20" y="45" width="2" height="2"/><rect x="45" y="35" width="2" height="2"/><rect x="60" y="25" width="2" height="2"/>
+              <rect x="90" y="30" width="2" height="2"/><rect x="120" y="40" width="2" height="2"/><rect x="150" y="33" width="2" height="2"/>
+              <rect x="180" y="45" width="2" height="2"/><rect x="210" y="25" width="2" height="2"/><rect x="240" y="35" width="2" height="2"/>
+              <rect x="270" y="28" width="2" height="2"/><rect x="300" y="40" width="2" height="2"/><rect x="330" y="32" width="2" height="2"/>
+              <rect x="360" y="45" width="2" height="2"/><rect x="190" y="42" width="2" height="2"/>
+            </g>
+          </svg>
+        </div>
+        <div class="arena-floor"></div>
+        <!-- مناطق السوق الثلاث -->
+        <div class="market-zones-layer">
+          <div class="market-zone" data-zone="right" style="--z-color:#6b7fff">
+            <div class="zone-label">🏢 اليمنى</div>
+            <div class="zone-glow"></div>
+          </div>
+          <div class="market-zone" data-zone="center" style="--z-color:#ffd700">
+            <div class="zone-label">🏛️ الوسطى</div>
+            <div class="zone-glow"></div>
+          </div>
+          <div class="market-zone" data-zone="left" style="--z-color:#1abc9c">
+            <div class="zone-label">🏬 اليسرى</div>
+            <div class="zone-glow"></div>
+          </div>
+        </div>
+        <!-- بوابات العملاء (أعلى كل منطقة) -->
+        <div class="portal" data-zone="right" style="--p-color:#6b7fff">
+          <div class="portal-arch"></div>
+          <div class="portal-icon">🚪</div>
+        </div>
+        <div class="portal" data-zone="center" style="--p-color:#ffd700">
+          <div class="portal-arch"></div>
+          <div class="portal-icon">🚪</div>
+        </div>
+        <div class="portal" data-zone="left" style="--p-color:#1abc9c">
+          <div class="portal-arch"></div>
+          <div class="portal-icon">🚪</div>
+        </div>
+        <div class="lamp lamp-tl"></div>
+        <div class="lamp lamp-tr"></div>
+        <div class="lamp lamp-bl"></div>
+        <div class="lamp lamp-br"></div>
+        <div class="player-zone-marker"></div>
+        <div class="base enemy" id="enemyBase">
+          <div class="base-building" id="enemyBuilding"></div>
+        </div>
+        <div class="base player" id="playerBase">
+          <div class="base-building" id="playerBuilding"></div>
+        </div>
+      </div>
+
+      <div class="bottom-bar">
+        <div class="forecast-bar" id="forecastBar"></div>
+        <div class="selector-hint" id="selectorHint">دورك! اختر مبادرة ثم انقر في ملعبك</div>
+        <div class="action-row">
+          <div class="bank-display">
+            <span class="bank-label">🏦 الرصيد:</span>
+            <span class="bank-amount"><span id="bankValue">2,000</span> <span class="currency">ر.س</span></span>
+          </div>
+          <button class="end-turn-btn" id="endTurnBtn" onclick="Battle.endPlayerTurn()">⏭️ إنهاء الشهر</button>
+        </div>
+        <div class="cards-wrap"><div class="cards-row" id="cardsRow"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen" id="levelsScreen">
+    <button class="close-x" onclick="UI.backToMenu()">✕</button>
+    <h2 style="color:#ffd700;margin-bottom:8px;">🗺️ رحلة الـ 100 منافس</h2>
+    <p style="opacity:0.7;text-align:center;margin-bottom:14px;font-size:12px;">تفوّق على 100 شركة منافسة</p>
+    <div class="levels-grid" id="levelsGrid"></div>
+  </div>
+
+  <div class="screen" id="deckScreen">
+    <button class="close-x" onclick="UI.backToMenu()">✕</button>
+    <h2 style="color:#ffd700;margin-bottom:6px;">🎴 ترتيب المبادرات</h2>
+    <p style="opacity:0.7;font-size:12px;text-align:center;margin-bottom:12px;">اختر حتى <span id="deckMaxInfo">4</span> مبادرات للمنافسة (تتوسع مع المستوى)</p>
+    <div class="deck-builder">
+      <div class="deck-section">
+        <h3>مجموعتي الحالية (<span id="deckCount">0</span>/<span id="deckMax">4</span>)</h3>
+        <div class="cards-grid" id="myDeckGrid"></div>
+      </div>
+      <div class="deck-section">
+        <h3>المبادرات المتاحة</h3>
+        <div class="cards-grid" id="allCardsGrid"></div>
+      </div>
+    </div>
+    <button class="btn" onclick="UI.saveDeck()" style="margin-top:10px;">💾 حفظ المجموعة</button>
+  </div>
+
+  <div class="screen" id="leaderScreen">
+    <button class="close-x" onclick="UI.backToMenu()">✕</button>
+    <h2 style="color:#ffd700;margin-bottom:10px;">📊 تصنيف الرواد</h2>
+    <p style="opacity:0.7;font-size:12px;text-align:center;margin-bottom:14px;">أصحاب أعلى رصيد تجاري</p>
+    <div class="leaderboard-list" id="leaderList"></div>
+  </div>
+
+  <div class="screen" id="helpScreen">
+    <button class="close-x" onclick="UI.backToMenu()">✕</button>
+    <div style="max-width:500px;padding:20px;text-align:right;">
+      <h2 style="color:#ffd700;margin-bottom:12px;text-align:center;">❓ كيف تلعب</h2>
+      <div class="help-section"><strong>🎯 الهدف:</strong><p>تفوّق على المنافس بالاستحواذ على شركته، أو اجمع عملاء وأرباح أكثر بعد 3 أشهر.</p></div>
+      <div class="help-section"><strong>🏦 رصيد الشركة:</strong><p>تبدأ برصيد 2,000 ر.س. كل مبادرة تطلقها تُخصم من رصيد شركتك مباشرة. لا سقف محدد — استخدم ما تملك.</p></div>
+      <div class="help-section"><strong>📅 دورة الربع:</strong><p>كل ربع = 3 أشهر. كل شهر تختار مبادراتك (20 ثانية)، يختار المنافس، ثم نرى نتائج السوق.</p></div>
+      <div class="help-section"><strong>🧑 عملاء SaaS:</strong><p>العملاء يتراكمون عبر كل المنافسات! كل عميل يضيف إيراد متكرر في كل ربع قادم.</p></div>
+      <div class="help-section"><strong>💰 دخل شهري:</strong><p>عند بداية كل شهر، تحصل على دخل تشغيلي يُضاف لرصيدك.</p></div>
+      <div class="help-section"><strong>👼 المستثمر الملائكي:</strong><p>استخدامه محدود حسب الصعوبة: سهل 3 مرات/ربع، متوسط 2، صعب 1 فقط.</p></div>
+      <button class="btn ghost" onclick="Tutorial.restart()" style="margin-top:10px;width:100%;min-width:auto;">🔄 إعادة الجولة التعريفية</button>
+    </div>
+  </div>
+
+  <div class="modal" id="resultModal">
+    <div class="modal-box">
+      <div id="resultEmoji" style="font-size:50px;margin-bottom:8px;">🎉</div>
+      <h2 id="resultTitle">نجاح!</h2>
+      <p id="resultSubtitle"></p>
+      <div id="mentorWrap"></div>
+      <div id="quarterReportWrap"></div>
+      <button class="btn" onclick="UI.nextOrRetry()"><span id="nextBtnLabel">الربع التالي</span></button>
+      <button class="btn ghost" onclick="UI.backToMenu()">القائمة الرئيسية</button>
+    </div>
+  </div>
+
+  <div class="modal" id="idleModal">
+    <div class="modal-box">
+      <div style="font-size:50px;">📦</div>
+      <h2>صندوق الأرباح اليومية</h2>
+      <p>بينما كنت بعيداً، استمرت شركتك بجمع الأرباح:</p>
+      <div class="quarter-report">
+        <div class="quarter-row"><span class="label">⏰ الوقت الذي غبته:</span><span class="value" id="idleTime">-</span></div>
+        <div class="quarter-row final"><span class="label">💰 الأرباح المتراكمة:</span><span class="value"><span id="idleCoins">0</span> <span class="currency">ر.س</span></span></div>
+      </div>
+      <button class="btn" onclick="UI.collectIdle()">🎁 استلام الأرباح</button>
+    </div>
+  </div>
+
+  <!-- نافذة إعدادات الصوت -->
+  <div class="modal" id="soundModal">
+    <div class="modal-box">
+      <div style="font-size:48px;">🎵</div>
+      <h2>إعدادات الصوت</h2>
+
+      <div class="sound-section">
+        <h3 class="sound-section-title">🔊 التشغيل</h3>
+        <div class="sound-toggles">
+          <button class="sound-toggle" id="sfxToggle" onclick="UI.toggleSfx()">
+            <div class="st-icon">🎮</div>
+            <div class="st-label">مؤثرات صوتية</div>
+            <div class="st-state" id="sfxState">مفعلة</div>
+          </button>
+          <button class="sound-toggle" id="musicToggle" onclick="UI.toggleMusic()">
+            <div class="st-icon">🎼</div>
+            <div class="st-label">موسيقى خلفية</div>
+            <div class="st-state" id="musicState">متوقفة</div>
+          </button>
+        </div>
+      </div>
+
+      <div class="sound-section">
+        <h3 class="sound-section-title">🎨 نمط الصوت</h3>
+        <div class="theme-grid">
+          <button class="theme-btn" data-theme="modern" onclick="UI.setSoundTheme('modern')">
+            <div class="t-emoji">🎹</div>
+            <div class="t-name">عصري</div>
+            <div class="t-desc">نغمات ناعمة متدرجة</div>
+          </button>
+          <button class="theme-btn" data-theme="arcade" onclick="UI.setSoundTheme('arcade')">
+            <div class="t-emoji">🕹️</div>
+            <div class="t-name">أركيد</div>
+            <div class="t-desc">نغمات 8-بت كلاسيكية</div>
+          </button>
+          <button class="theme-btn" data-theme="cinematic" onclick="UI.setSoundTheme('cinematic')">
+            <div class="t-emoji">🎬</div>
+            <div class="t-name">سينمائي</div>
+            <div class="t-desc">موسيقى وترية ملحمية</div>
+          </button>
+          <button class="theme-btn" data-theme="minimal" onclick="UI.setSoundTheme('minimal')">
+            <div class="t-emoji">🧘</div>
+            <div class="t-name">بسيط</div>
+            <div class="t-desc">نقرات خفيفة هادئة</div>
+          </button>
+          <button class="theme-btn" data-theme="mute" onclick="UI.setSoundTheme('mute')">
+            <div class="t-emoji">🔇</div>
+            <div class="t-name">صامت</div>
+            <div class="t-desc">لا أصوات نهائياً</div>
+          </button>
+        </div>
+      </div>
+
+      <div class="sound-section">
+        <h3 class="sound-section-title">🔈 مستوى الصوت: <span id="volumeLabel">50</span>%</h3>
+        <input type="range" min="0" max="100" value="50" id="volumeSlider" class="volume-slider" oninput="UI.setVolume(this.value)">
+      </div>
+
+      <button class="btn" onclick="UI.closeSoundModal()">✓ موافق</button>
+    </div>
+  </div>
+
+  <div class="tutorial-overlay" id="tutorialOverlay">
+    <div class="tutorial-bubble" id="tutorialBubble">
+      <div class="tutorial-header">
+        <div class="tutorial-avatar" id="tutAvatar">👨‍🏫</div>
+        <div style="flex:1;">
+          <div class="tutorial-name" id="tutName">المرشد يوسف</div>
+          <div class="tutorial-role" id="tutRole">رائد أعمال محنّك</div>
+        </div>
+        <div class="tutorial-step" id="tutStep">1/5</div>
+      </div>
+      <div class="tutorial-text" id="tutText"></div>
+      <div class="tutorial-actions">
+        <button class="tutorial-btn skip" onclick="Tutorial.skipAll()">تخطي</button>
+        <button class="tutorial-btn" id="tutNextBtn" onclick="Tutorial.next()">التالي →</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+document.addEventListener('gesturestart',e=>e.preventDefault());
+document.addEventListener('gesturechange',e=>e.preventDefault());
+document.addEventListener('gestureend',e=>e.preventDefault());
+document.addEventListener('dblclick',e=>e.preventDefault(),{passive:false});
+document.addEventListener('wheel',e=>{if(e.ctrlKey)e.preventDefault();},{passive:false});
+document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&['+','-','=','0'].includes(e.key))e.preventDefault();});
+let lastTouchEnd=0;
+document.addEventListener('touchend',e=>{const now=Date.now();if(now-lastTouchEnd<=300)e.preventDefault();lastTouchEnd=now;},{passive:false});
+
+const MONTHS = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+const QUARTERS = ['الربع الأول','الربع الثاني','الربع الثالث','الربع الرابع'];
+const SAAS_PER_CUSTOMER = 80;
+const TURN_TIME = 20;
+const MONTHS_PER_MATCH = 3;
+const INITIAL_BANK = 2000;
+const MONTHLY_INCOME = 500;
+const ANGEL_BOOST = 1500;
+
+const DIFFICULTY = {
+  easy:   { label: '🌱 سهل',   enemyMvMul: 0.85, enemyCardsPerTurn: 1, enemyMonthlyIncome: 450, angelUsesPerQuarter: 3, rewardMul: 0.8 },
+  medium: { label: '⚖️ متوسط', enemyMvMul: 1.15, enemyCardsPerTurn: 2, enemyMonthlyIncome: 700, angelUsesPerQuarter: 2, rewardMul: 1.0 },
+  hard:   { label: '🔥 صعب',   enemyMvMul: 1.55, enemyCardsPerTurn: 3, enemyMonthlyIncome: 1000, angelUsesPerQuarter: 1, rewardMul: 1.5 }
+};
+
+/* ================================================================
+   أحداث السوق العشوائية - تغيّر شكل كل جولة
+   ================================================================ */
+const MARKET_EVENTS = [
+  { id: 'ramadan',        name: 'رمضان كريم', emoji: '🌙', desc: 'موسم المبيعات! تكاليف الحملات التسويقية والانتشار -50%',
+    effects: { costMul: { marketing: 0.5, viral: 0.5 } }, color: '#ffd700' },
+  { id: 'recession',      name: 'ركود اقتصادي', emoji: '📉', desc: 'الدخل الشهري -50%، لكن كل البطاقات -20% خصم',
+    effects: { incomeMul: 0.5, costMulAll: 0.8 }, color: '#ff6b6b' },
+  { id: 'viral_trend',    name: 'ترند فيروسي!', emoji: '🚀', desc: 'العملاء يتضاعفون — فرصة ذهبية لجذبهم',
+    effects: { customerSpawnMul: 2, customerValueMul: 1.3 }, color: '#6b7fff' },
+  { id: 'techboom',       name: 'طفرة تقنية', emoji: '💡', desc: 'الابتكار التقني والانتشار +50% تأثير',
+    effects: { impactMul: { innovation: 1.5, viral: 1.5 } }, color: '#3ee68a' },
+  { id: 'pricewar',       name: 'حرب أسعار', emoji: '⚔️', desc: 'التخفيضات ومندوبو المبيعات تأثيرهم مضاعف',
+    effects: { impactMul: { discount: 2, salesrep: 1.5 } }, color: '#ff9f43' },
+  { id: 'angelrain',      name: 'ممطر استثمارات', emoji: '💸', desc: 'مستثمرون ملائكيون إضافيون (+2 استخدام)',
+    effects: { extraAngelUses: 2 }, color: '#ffd700' },
+  { id: 'scandal',        name: 'فضيحة المنافس!', emoji: '📰', desc: 'المنافس يبدأ بقيمة سوقية -25%',
+    effects: { enemyStartMvMul: 0.75 }, color: '#2ecc71' },
+  { id: 'crisis',         name: 'أزمة سيولة', emoji: '🔥', desc: 'رصيدك -30%، لكن مكافأة الفوز +60%',
+    effects: { startCashMul: 0.7, rewardMul: 1.6 }, color: '#ff4757' },
+  { id: 'nationalday',    name: 'اليوم الوطني السعودي', emoji: '🇸🇦', desc: 'كل المبادرات -100 ر.س، احتفل!',
+    effects: { costFlat: -100 }, color: '#2ecc71' },
+  { id: 'bonusincome',    name: 'موسم الحصاد', emoji: '🌾', desc: 'الدخل الشهري +80%',
+    effects: { incomeMul: 1.8 }, color: '#ffd700' },
+  { id: 'premiummarket',  name: 'سوق فاخر', emoji: '💎', desc: 'الجودة الفاخرة والعلامة التجارية قوتها مضاعفة',
+    effects: { impactMul: { premium: 2, brand: 1.8 } }, color: '#6b7fff' },
+  { id: 'networkboom',    name: 'طفرة علاقات', emoji: '🤝', desc: 'الشراكات الاحتكارية +70% قوة',
+    effects: { impactMul: { monopoly: 1.7 } }, color: '#ff9f43' },
+  { id: 'vipday',         name: 'يوم عملاء VIP', emoji: '👑', desc: '50% من العملاء نوع VIP (قيمة مضاعفة)',
+    effects: { vipChance: 0.5 }, color: '#ffd700' },
+  { id: 'talentwar',      name: 'حرب المواهب', emoji: '👥', desc: 'فريق الموظفين يستدعي 5 بدل 3',
+    effects: { swarmCount: 5 }, color: '#3ee68a' },
+  { id: 'marketcrash',    name: 'انهيار سوقي', emoji: '💥', desc: 'كلاكما تبدؤون بـ -30% قيمة سوقية',
+    effects: { bothStartMvMul: 0.7 }, color: '#ff4757' },
+  { id: 'expansion',      name: 'توسع دولي', emoji: '🌍', desc: 'مكافأة الفوز +100% ر.س',
+    effects: { rewardMul: 2 }, color: '#6b7fff' },
+  { id: 'patentwar',      name: 'حرب براءات', emoji: '📜', desc: 'براءة الاختراع تكلفتها 100 ر.س فقط',
+    effects: { costOverride: { patent: 100 } }, color: '#ff9f43' },
+  { id: 'steady',         name: 'سوق هادئ', emoji: '☁️', desc: 'جولة عادية بلا مفاجآت',
+    effects: {}, color: '#95a5a6' }
+];
+
+/* ================================================================
+   أنواع العملاء - كل نوع بقيمة ومظهر مختلف
+   ================================================================ */
+const CUSTOMER_TYPES = [
+  { id: 'student',     emoji: '🧑‍🎓', name: 'طالب',        value: 40,  weight: 25, color: '#6b7fff', size: 1.0 },
+  { id: 'regular',     emoji: '🧑',    name: 'عميل عادي',   value: 80,  weight: 35, color: '#ffd700', size: 1.0 },
+  { id: 'mom',         emoji: '👩',    name: 'ربة منزل',    value: 120, weight: 15, color: '#ff9f43', size: 1.05 },
+  { id: 'worker',      emoji: '👷',    name: 'موظف',        value: 100, weight: 12, color: '#1abc9c', size: 1.0 },
+  { id: 'businessman', emoji: '👨‍💼', name: 'رجل أعمال',   value: 200, weight: 8,  color: '#2ecc71', size: 1.15 },
+  { id: 'vip',         emoji: '🤵',    name: 'VIP',          value: 400, weight: 4,  color: '#e74c3c', size: 1.25 },
+  { id: 'whale',       emoji: '🦸',    name: 'عميل أسطوري', value: 1000, weight: 1, color: '#9b59b6', size: 1.4 }
+];
+
+/* ================================================================
+   مناطق السوق - 3 مناطق ثابتة مع بوابات
+   ================================================================ */
+const CUSTOMER_ZONES = [
+  { id: 'right',  name: 'المنطقة اليمنى', emoji: '🏢', xStart: 0.05, xEnd: 0.33, color: '#6b7fff', gradient: 'rgba(107,127,255,0.18)' },
+  { id: 'center', name: 'المنطقة الوسطى', emoji: '🏛️', xStart: 0.37, xEnd: 0.63, color: '#ffd700', gradient: 'rgba(255,215,0,0.18)' },
+  { id: 'left',   name: 'المنطقة اليسرى', emoji: '🏬', xStart: 0.67, xEnd: 0.95, color: '#1abc9c', gradient: 'rgba(26,188,156,0.18)' }
+];
+
+function getZone(id) { return CUSTOMER_ZONES.find(z => z.id === id); }
+
+function pickCustomerType(vipBoost) {
+  let pool = CUSTOMER_TYPES;
+  if (vipBoost) {
+    // مع VIP boost يزيد احتمال ظهور عملاء VIP و whale
+    pool = CUSTOMER_TYPES.map(t => ({
+      ...t,
+      weight: (t.id === 'vip' || t.id === 'whale') ? t.weight * 8 : t.weight * 0.5
+    }));
+  }
+  const totalWeight = pool.reduce((a, t) => a + t.weight, 0);
+  let r = Math.random() * totalWeight;
+  for (const t of pool) { r -= t.weight; if (r <= 0) return t; }
+  return pool[0];
+}
+
+const CARDS_DB = {
+  salesrep:   { name: 'مندوب مبيعات',    emoji: '👨‍💼', cost: 200,  mv: 45,  impact: 10, speed: 65, range: 30, role: 'launch',      desc: 'رخيص وسريع، ضغط مبكر على السوق' },
+  angel:      { name: 'مستثمر ملائكي',  emoji: '👼',   cost: 300,  mv: 0,   impact: 0,  speed: 0,  range: 0,  role: 'spell_cash',  desc: `+${ANGEL_BOOST} ر.س فوراً، يأخذ 30% من أرباحك` },
+  product:    { name: 'منتج جديد',       emoji: '📦',   cost: 300,  mv: 60,  impact: 15, speed: 40, range: 35, role: 'launch',      desc: 'مبادرة متوازنة، تمتد لتؤثر على السوق' },
+  discount:   { name: 'تخفيض أسعار',    emoji: '🏷️',   cost: 350,  mv: 35,  impact: 20, speed: 60, range: 30, role: 'launch',      desc: 'جذب عملاء بسرعة، ربح أقل' },
+  patent:     { name: 'براءة اختراع',   emoji: '📜',   cost: 400,  mv: 0,   impact: 0,  speed: 0,  range: 0,  role: 'spell_erode', desc: 'تآكل 30 نقطة من كل مبادرات المنافس' },
+  marketing:  { name: 'حملة تسويقية',    emoji: '📣',   cost: 450,  mv: 40,  impact: 25, speed: 55, range: 70, role: 'broadcast',   desc: 'ترمي تأثيرها من بعيد، تجذب عملاء' },
+  viral:      { name: 'انتشار فيروسي',  emoji: '🚀',   cost: 500,  mv: 50,  impact: 18, speed: 70, range: 45, role: 'broadcast',   desc: 'انتشار سريع جداً ومدى بعيد' },
+  hr:         { name: 'فريق موظفين',    emoji: '👥',   cost: 500,  mv: 70,  impact: 12, speed: 40, range: 25, role: 'swarm',       desc: 'يستدعي 3 موظفين دفعة واحدة' },
+  premium:    { name: 'جودة فاخرة',     emoji: '💎',   cost: 600,  mv: 100, impact: 30, speed: 28, range: 35, role: 'fortress',    desc: 'بطيء لكن قوي ومقاوم جداً' },
+  monopoly:   { name: 'شراكة احتكارية', emoji: '🤝',   cost: 700,  mv: 90,  impact: 20, speed: 32, range: 30, role: 'fortress',    desc: 'قوة سوقية، متينة ومؤثرة' },
+  innovation: { name: 'ابتكار تقني',    emoji: '💡',   cost: 800,  mv: 80,  impact: 40, speed: 36, range: 40, role: 'launch',      desc: 'منتج تقني فائق، تأثير عالٍ' },
+  brand:      { name: 'علامة تجارية',   emoji: '👑',   cost: 1000, mv: 130, impact: 35, speed: 24, range: 40, role: 'fortress',    desc: 'ولاء العملاء، أقوى مبادرة' }
+};
+
+const SAVE_KEY = 'innovation_clash_v4';
+const State = {
+  level: 1,
+  bankBalance: INITIAL_BANK,
+  totalCustomers: 0,
+  completedLevels: [],
+  unlockedCards: ['product', 'marketing', 'salesrep', 'discount', 'angel'],
+  deck: ['product', 'marketing', 'salesrep', 'angel'],
+  difficulty: 'medium',
+  lastSeen: Date.now(),
+  totalWins: 0,
+  totalLosses: 0,
+  playerName: 'أنا',
+  tutorialsSeen: {},
+  soundTheme: 'modern',
+  sfxEnabled: true,
+  musicEnabled: false,
+  soundVolume: 0.5,
+  getDeckMax() {
+    if (this.level < 5) return 4;
+    if (this.level < 15) return 5;
+    if (this.level < 30) return 6;
+    if (this.level < 60) return 7;
+    return 8;
+  },
+  getRecurringRevenue() { return this.totalCustomers * SAAS_PER_CUSTOMER; },
+  save() {
+    try {
+      localStorage.setItem(SAVE_KEY, JSON.stringify({
+        level: this.level, bankBalance: this.bankBalance,
+        totalCustomers: this.totalCustomers,
+        completedLevels: this.completedLevels,
+        unlockedCards: this.unlockedCards, deck: this.deck,
+        difficulty: this.difficulty, lastSeen: Date.now(),
+        totalWins: this.totalWins, totalLosses: this.totalLosses,
+        playerName: this.playerName, tutorialsSeen: this.tutorialsSeen,
+        soundTheme: this.soundTheme, sfxEnabled: this.sfxEnabled,
+        musicEnabled: this.musicEnabled, soundVolume: this.soundVolume
+      }));
+    } catch(e) {}
+  },
+  load() {
+    try {
+      const data = JSON.parse(localStorage.getItem(SAVE_KEY));
+      if (data) Object.assign(this, data);
+    } catch(e) {}
+    if (this.bankBalance < 500) this.bankBalance = INITIAL_BANK;
+  },
+  reset() { localStorage.removeItem(SAVE_KEY); location.reload(); }
+};
+
+/* ================================================================
+   نظام الأصوات - Web Audio API بأنماط متعددة
+   ================================================================ */
+const Sound = {
+  ctx: null, master: null, sfxBus: null, musicBus: null,
+  musicActive: false, musicTimer: null, lastTickTime: 0,
+
+  init() {
+    if (this.ctx) return;
+    try {
+      this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+      this.master = this.ctx.createGain();
+      this.master.gain.value = State.soundVolume;
+      this.master.connect(this.ctx.destination);
+      this.sfxBus = this.ctx.createGain();
+      this.sfxBus.gain.value = State.sfxEnabled ? 1 : 0;
+      this.sfxBus.connect(this.master);
+      this.musicBus = this.ctx.createGain();
+      this.musicBus.gain.value = State.musicEnabled ? 0.4 : 0;
+      this.musicBus.connect(this.master);
+    } catch(e) { console.warn('Audio init failed', e); }
+  },
+
+  resume() {
+    if (!this.ctx) this.init();
+    if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
+  },
+
+  setVolume(v) {
+    State.soundVolume = v;
+    State.save();
+    if (this.master) this.master.gain.value = v;
+  },
+
+  setTheme(theme) {
+    State.soundTheme = theme;
+    State.save();
+    if (this.musicActive) { this.stopMusic(); this.startMusic(); }
+    this.play('select');
+  },
+
+  setSfx(enable) {
+    State.sfxEnabled = enable;
+    State.save();
+    if (this.sfxBus) this.sfxBus.gain.value = enable ? 1 : 0;
+  },
+
+  setMusic(enable) {
+    State.musicEnabled = enable;
+    State.save();
+    if (enable) this.startMusic();
+    else this.stopMusic();
+  },
+
+  play(name) {
+    this.resume();
+    if (!this.ctx || !State.sfxEnabled || State.soundTheme === 'mute') return;
+    const theme = this.sfxMap[State.soundTheme] || this.sfxMap.modern;
+    const fn = theme[name];
+    if (fn) try { fn(); } catch(e) {}
+  },
+
+  tone(freq, dur, vol, type) {
+    if (!this.ctx) return;
+    const o = this.ctx.createOscillator();
+    const g = this.ctx.createGain();
+    o.type = type || 'sine';
+    o.frequency.value = freq;
+    g.gain.setValueAtTime(0, this.ctx.currentTime);
+    g.gain.linearRampToValueAtTime(vol, this.ctx.currentTime + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + dur);
+    o.connect(g); g.connect(this.sfxBus);
+    o.start();
+    o.stop(this.ctx.currentTime + dur + 0.05);
+  },
+
+  sweep(f1, f2, dur, vol, type) {
+    if (!this.ctx) return;
+    const o = this.ctx.createOscillator();
+    const g = this.ctx.createGain();
+    o.type = type || 'sine';
+    o.frequency.setValueAtTime(f1, this.ctx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(Math.max(0.01, f2), this.ctx.currentTime + dur);
+    g.gain.setValueAtTime(0, this.ctx.currentTime);
+    g.gain.linearRampToValueAtTime(vol, this.ctx.currentTime + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + dur);
+    o.connect(g); g.connect(this.sfxBus);
+    o.start();
+    o.stop(this.ctx.currentTime + dur + 0.05);
+  },
+
+  chord(freqs, dur, vol, type) {
+    freqs.forEach(f => this.tone(f, dur, vol / Math.sqrt(freqs.length), type));
+  },
+
+  noise(dur, vol) {
+    if (!this.ctx) return;
+    const size = Math.max(1, Math.floor(this.ctx.sampleRate * dur));
+    const buf = this.ctx.createBuffer(1, size, this.ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < size; i++) data[i] = (Math.random() * 2 - 1) * (1 - i/size);
+    const src = this.ctx.createBufferSource();
+    src.buffer = buf;
+    const g = this.ctx.createGain();
+    g.gain.value = vol;
+    src.connect(g); g.connect(this.sfxBus);
+    src.start();
+  },
+
+  seq(notes, interval, fn) {
+    notes.forEach((n, i) => setTimeout(() => fn(n), i * interval));
+  },
+
+  sfxMap: {
+    modern: {
+      click:    () => Sound.tone(800, 0.08, 0.15, 'sine'),
+      select:   () => Sound.seq([600, 900], 50, f => Sound.tone(f, 0.08, 0.12, 'sine')),
+      deploy:   () => Sound.sweep(400, 900, 0.25, 0.2, 'triangle'),
+      impact:   () => { Sound.sweep(300, 150, 0.15, 0.2, 'sawtooth'); Sound.noise(0.08, 0.08); },
+      customer: () => Sound.seq([880, 1175, 1568], 60, f => Sound.tone(f, 0.12, 0.15, 'sine')),
+      coin:     () => Sound.sweep(700, 1500, 0.15, 0.18, 'sine'),
+      angel:    () => Sound.chord([523, 659, 784, 1047], 0.7, 0.22, 'triangle'),
+      patent:   () => { Sound.sweep(1500, 300, 0.3, 0.2, 'sawtooth'); Sound.noise(0.2, 0.1); },
+      win:      () => Sound.seq([523, 659, 784, 1047, 1319], 110, f => Sound.tone(f, 0.3, 0.22, 'triangle')),
+      lose:     () => Sound.sweep(400, 100, 0.8, 0.25, 'sawtooth'),
+      newMonth: () => Sound.chord([392, 523], 0.4, 0.18, 'triangle'),
+      tick:     () => Sound.tone(1000, 0.04, 0.15, 'square'),
+      bonus:    () => Sound.seq([1047, 1319, 1568, 2093], 70, f => Sound.tone(f, 0.15, 0.18, 'sine'))
+    },
+    arcade: {
+      click:    () => Sound.tone(440, 0.05, 0.15, 'square'),
+      select:   () => Sound.seq([660, 880], 60, f => Sound.tone(f, 0.06, 0.15, 'square')),
+      deploy:   () => Sound.seq([330, 440, 550, 660], 50, f => Sound.tone(f, 0.07, 0.15, 'square')),
+      impact:   () => { Sound.noise(0.1, 0.25); Sound.tone(200, 0.1, 0.2, 'square'); },
+      customer: () => Sound.seq([660, 880, 1100, 1320], 55, f => Sound.tone(f, 0.09, 0.15, 'square')),
+      coin:     () => Sound.seq([987, 1318], 70, f => Sound.tone(f, 0.1, 0.15, 'square')),
+      angel:    () => Sound.seq([523, 659, 784, 1047, 1319], 75, f => Sound.tone(f, 0.13, 0.16, 'square')),
+      patent:   () => Sound.seq([1047, 784, 523, 392], 55, f => Sound.tone(f, 0.1, 0.18, 'square')),
+      win:      () => Sound.seq([523, 659, 784, 1047, 1319, 1568, 2093], 90, f => Sound.tone(f, 0.18, 0.2, 'square')),
+      lose:     () => Sound.seq([330, 262, 196, 131], 150, f => Sound.tone(f, 0.25, 0.22, 'square')),
+      newMonth: () => Sound.seq([660, 880], 80, f => Sound.tone(f, 0.12, 0.15, 'square')),
+      tick:     () => Sound.tone(880, 0.03, 0.14, 'square'),
+      bonus:    () => Sound.seq([880, 1175, 1568, 2093], 60, f => Sound.tone(f, 0.12, 0.16, 'square'))
+    },
+    minimal: {
+      click:    () => Sound.tone(2000, 0.02, 0.08, 'sine'),
+      select:   () => Sound.tone(1800, 0.04, 0.08, 'sine'),
+      deploy:   () => Sound.tone(1200, 0.08, 0.1, 'sine'),
+      impact:   () => Sound.noise(0.05, 0.08),
+      customer: () => Sound.tone(1500, 0.12, 0.1, 'sine'),
+      coin:     () => Sound.tone(1800, 0.1, 0.1, 'sine'),
+      angel:    () => Sound.sweep(800, 1600, 0.3, 0.12, 'sine'),
+      patent:   () => Sound.tone(600, 0.2, 0.1, 'sine'),
+      win:      () => Sound.chord([880, 1318, 1760], 0.5, 0.14, 'sine'),
+      lose:     () => Sound.tone(200, 0.5, 0.12, 'sine'),
+      newMonth: () => Sound.tone(1000, 0.1, 0.08, 'sine'),
+      tick:     () => Sound.tone(2500, 0.02, 0.08, 'sine'),
+      bonus:    () => Sound.sweep(1000, 2000, 0.3, 0.1, 'sine')
+    },
+    cinematic: {
+      click:    () => Sound.chord([220, 330], 0.15, 0.15, 'triangle'),
+      select:   () => Sound.chord([330, 440, 550], 0.2, 0.15, 'sine'),
+      deploy:   () => { Sound.chord([220, 277, 330], 0.35, 0.2, 'triangle'); Sound.noise(0.1, 0.05); },
+      impact:   () => { Sound.sweep(150, 60, 0.4, 0.3, 'sawtooth'); Sound.noise(0.25, 0.15); },
+      customer: () => Sound.chord([523, 659, 784, 988], 0.4, 0.2, 'triangle'),
+      coin:     () => Sound.chord([1175, 1568], 0.25, 0.15, 'sine'),
+      angel:    () => Sound.seq([[523, 784], [659, 988], [784, 1175]], 150, ch => Sound.chord(ch, 0.4, 0.15, 'triangle')),
+      patent:   () => { Sound.sweep(800, 200, 0.5, 0.25, 'sawtooth'); Sound.noise(0.3, 0.15); },
+      win:      () => Sound.seq([[262, 330, 392], [294, 370, 440], [330, 415, 494], [349, 440, 523]], 180, ch => Sound.chord(ch, 0.45, 0.22, 'triangle')),
+      lose:     () => { Sound.sweep(440, 110, 1.0, 0.3, 'sawtooth'); Sound.noise(0.5, 0.1); },
+      newMonth: () => Sound.chord([349, 440, 523], 0.35, 0.18, 'triangle'),
+      tick:     () => Sound.tone(700, 0.08, 0.12, 'triangle'),
+      bonus:    () => Sound.seq([[523, 659], [659, 784], [784, 988], [988, 1175]], 100, ch => Sound.chord(ch, 0.2, 0.18, 'triangle'))
+    },
+    mute: {}
+  },
+
+  startMusic() {
+    if (!State.musicEnabled || this.musicActive) return;
+    this.resume();
+    if (!this.ctx) return;
+    this.musicActive = true;
+    this.playMusicLoop();
+  },
+
+  stopMusic() {
+    this.musicActive = false;
+    if (this.musicTimer) { clearTimeout(this.musicTimer); this.musicTimer = null; }
+  },
+
+  playMusicLoop() {
+    if (!this.musicActive || !this.ctx) return;
+    const themes = {
+      modern:    { notes: [262, 330, 392, 523, 392, 330, 440, 523], interval: 420, type: 'sine' },
+      arcade:    { notes: [262, 262, 330, 330, 392, 392, 330, 262], interval: 350, type: 'square' },
+      minimal:   { notes: [262, 0, 392, 0, 330, 0, 440, 0],         interval: 700, type: 'sine' },
+      cinematic: { notes: [131, 165, 196, 262, 196, 165, 131, 196], interval: 600, type: 'triangle' }
+    };
+    const t = themes[State.soundTheme] || themes.modern;
+    t.notes.forEach((f, i) => {
+      if (f === 0) return;
+      setTimeout(() => {
+        if (!this.musicActive) return;
+        const o = this.ctx.createOscillator();
+        const g = this.ctx.createGain();
+        o.type = t.type;
+        o.frequency.value = f;
+        g.gain.setValueAtTime(0, this.ctx.currentTime);
+        g.gain.linearRampToValueAtTime(0.2, this.ctx.currentTime + 0.05);
+        g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + t.interval/1000);
+        o.connect(g); g.connect(this.musicBus);
+        o.start();
+        o.stop(this.ctx.currentTime + t.interval/1000 + 0.1);
+      }, i * t.interval);
+    });
+    this.musicTimer = setTimeout(() => this.playMusicLoop(), t.notes.length * t.interval);
+  }
+};
+
+function generateBosses() {
+  const names = [
+    'كشك الحي','بقالة السوق','شركة الأحلام','مصنع الريادة','بيت الجودة',
+    'سوق الذكاء','واحة التجارة','نواة الصناعة','مؤسسة البناء','شركة الفجر',
+    'مجموعة النور','قمة الابتكار','جسر التقدم','منارة العصر','إمبراطورية المال',
+    'قلعة التكنولوجيا','شبكة الذكاء','أفق المستقبل','معمار القوة','تاج التجارة',
+    'سهم الصعود','كنز الأعمال','بوابة النجاح','مركز التحول','جوهرة السوق',
+    'شعلة الإبداع','درع الشركات','نجمة الخليج','حصن المال','مجرة العمل',
+    'بحر الفرص','جبل الإنجاز','عرش التجارة','ضوء المعرفة','نبض السوق',
+    'ملك البيع','أمير التجارة','سلطان المنتج','فارس الأعمال','بطل الصناعة',
+    'شمس الاقتصاد','قمر الأرباح','نهر الأموال','غابة الفرص','صحراء العزيمة',
+    'بركان الابتكار','عاصفة التغيير','موجة الحداثة','رياح التجديد','زلزال السوق',
+    'أسطورة التقنية','ذروة التميز','قوس النصر','نادي المليار','مجلس العمالقة',
+    'اتحاد القوى','تحالف الكبار','جبهة الأعمال','خلية النحل','شبكة العنكبوت',
+    'نسر الأعمال','صقر التجارة','ذئب السوق','أسد الصناعة','فهد السرعة',
+    'تنين الابتكار','عنقاء الصعود','كوبرا المنافسة','شارك التجارة','حوت السوق',
+    'إعصار المبيعات','بلازما الابتكار','نيوترون الربح','إلكترون السرعة','كوانتم المستقبل',
+    'ماتريكس التجارة','جينوم الأعمال','نيكسوس العالم','أوديسا التحول','أفاتار السوق',
+    'ستاركس للتقنية','أوميجا القمة','ألفا العصر','زينيث النجاح','أبولو الفضاء',
+    'هيفايستوس الصناعة','أثينا الحكمة','زيوس القرار','نبتون البحار','مارس الحرب',
+    'جوبيتر العملاق','ساتورن الخاتم','يورانوس الجليد','نبتون الزرقاء','بلوتو البعيد',
+    'سيريوس الساطع','فيجا الأسطورة','أنتاريس المحارب','ريجيل العمود','بيتلجوز الأحمر'
+  ];
+  const strategies = ['aggressive','defensive','swarm','economy','balanced','monopoly','pricedump'];
+  return Array.from({ length: 100 }, (_, i) => ({
+    id: i + 1,
+    name: names[i] || `شركة ${i+1}`,
+    baseMv: Math.round(280 + i * 12),
+    strategy: strategies[i % strategies.length],
+    difficulty: 1 + i * 0.05,
+    deckPool: ['product','marketing','salesrep','discount','premium','innovation','hr','viral','monopoly'],
+    baseReward: 400 + i * 80,
+    stage: i < 25 ? 1 : i < 50 ? 2 : i < 75 ? 3 : 4
+  }));
+}
+const BOSSES = generateBosses();
+
+function buildingSVG(stage, isEnemy) {
+  const color = isEnemy ? '#ff4757' : '#2ecc71';
+  const darkColor = isEnemy ? '#8b0020' : '#0a6b3d';
+  const glow = isEnemy ? '#ff6b6b' : '#3ee68a';
+  const wColor = isEnemy ? '#ffcdd4' : '#c7f5dd';
+  const baseId = isEnemy ? 'E' : 'P';
+
+  if (stage === 1) {
+    return `<svg viewBox="0 0 100 120" width="100%" height="100%" preserveAspectRatio="xMidYMax meet">
+      <defs><linearGradient id="wood${baseId}" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#a0522d"/><stop offset="100%" stop-color="#5a2d08"/></linearGradient></defs>
+      <ellipse cx="50" cy="115" rx="36" ry="4" fill="#000" opacity="0.4"/>
+      <polygon points="15,110 85,110 80,55 20,55" fill="url(#wood${baseId})" stroke="#3a2005" stroke-width="2"/>
+      <polygon points="15,60 85,60 50,25" fill="#654321" stroke="#3a2005" stroke-width="2"/>
+      <rect x="42" y="85" width="16" height="25" fill="#3a2005"/>
+      <circle cx="54" cy="97" r="1.5" fill="#ffd700"/>
+      <rect x="27" y="68" width="12" height="10" fill="${wColor}" stroke="#3a2005"/>
+      <rect x="61" y="68" width="12" height="10" fill="${wColor}" stroke="#3a2005"/>
+      <rect x="25" y="50" width="50" height="8" fill="${color}"/>
+      <text x="50" y="56" text-anchor="middle" fill="#fff" font-size="6" font-weight="bold" font-family="Arial">SHOP</text>
+    </svg>`;
+  }
+  if (stage === 2) {
+    return `<svg viewBox="0 0 100 120" width="100%" height="100%" preserveAspectRatio="xMidYMax meet">
+      <defs><linearGradient id="bldg${baseId}" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="${color}"/><stop offset="100%" stop-color="${darkColor}"/></linearGradient></defs>
+      <ellipse cx="50" cy="115" rx="38" ry="4" fill="#000" opacity="0.4"/>
+      <rect x="22" y="40" width="56" height="70" fill="url(#bldg${baseId})" stroke="#1a1f4e" stroke-width="2"/>
+      <rect x="18" y="36" width="64" height="6" fill="${color}" stroke="#1a1f4e" stroke-width="1"/>
+      <rect x="27" y="48" width="9" height="11" fill="${wColor}"/><rect x="45" y="48" width="9" height="11" fill="${wColor}"/><rect x="63" y="48" width="9" height="11" fill="${wColor}"/>
+      <rect x="27" y="64" width="9" height="11" fill="${wColor}"/><rect x="45" y="64" width="9" height="11" fill="${wColor}"/><rect x="63" y="64" width="9" height="11" fill="${wColor}"/>
+      <rect x="27" y="80" width="9" height="11" fill="${wColor}"/><rect x="45" y="80" width="9" height="11" fill="${wColor}"/><rect x="63" y="80" width="9" height="11" fill="${wColor}"/>
+      <rect x="43" y="96" width="14" height="14" fill="#1a1f4e"/>
+      <circle cx="53" cy="103" r="1" fill="#ffd700"/>
+      <rect x="47" y="28" width="6" height="12" fill="#888"/>
+      <circle cx="50" cy="26" r="2" fill="#ffd700"><animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/></circle>
+    </svg>`;
+  }
+  if (stage === 3) {
+    return `<svg viewBox="0 0 100 120" width="100%" height="100%" preserveAspectRatio="xMidYMax meet">
+      <defs><linearGradient id="tower${baseId}" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="${glow}"/><stop offset="50%" stop-color="${color}"/><stop offset="100%" stop-color="${darkColor}"/></linearGradient></defs>
+      <ellipse cx="50" cy="115" rx="40" ry="4" fill="#000" opacity="0.5"/>
+      <rect x="18" y="25" width="64" height="88" fill="url(#tower${baseId})" stroke="#1a1f4e" stroke-width="2"/>
+      ${[30,42,54,66,78].map(y => [20,30,40,52,63,73].map(x => `<rect x="${x}" y="${y}" width="7" height="7" fill="${wColor}"/>`).join('')).join('')}
+      <rect x="43" y="95" width="14" height="18" fill="#1a1f4e"/>
+      <circle cx="53" cy="105" r="1.5" fill="#ffd700"/>
+      <rect x="15" y="22" width="70" height="5" fill="#ffd700"/>
+      <polygon points="47,10 53,10 50,22" fill="#888"/>
+      <circle cx="50" cy="8" r="2" fill="#ff0000"><animate attributeName="opacity" values="1;0.2;1" dur="1s" repeatCount="indefinite"/></circle>
+    </svg>`;
+  }
+  return `<svg viewBox="0 0 100 120" width="100%" height="100%" preserveAspectRatio="xMidYMax meet">
+    <defs>
+      <linearGradient id="future${baseId}" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#ffd700"/><stop offset="20%" stop-color="${glow}"/><stop offset="70%" stop-color="${color}"/><stop offset="100%" stop-color="${darkColor}"/></linearGradient>
+      <linearGradient id="glass${baseId}" x1="0" x2="1" y1="0" y2="0"><stop offset="0%" stop-color="${wColor}" stop-opacity="0.9"/><stop offset="50%" stop-color="#fff" stop-opacity="1"/><stop offset="100%" stop-color="${wColor}" stop-opacity="0.9"/></linearGradient>
+    </defs>
+    <ellipse cx="50" cy="117" rx="42" ry="4" fill="#000" opacity="0.6"/>
+    <polygon points="32,115 32,18 50,6 68,18 68,115" fill="url(#future${baseId})" stroke="#ffd700" stroke-width="1.5"/>
+    ${[22,28,34,40,46,52,58,64,70,76,82,88,94,100].map(y => `<rect x="35" y="${y}" width="30" height="2.5" fill="url(#glass${baseId})" opacity="0.95"/>`).join('')}
+    <rect x="45" y="106" width="10" height="9" fill="#1a1f4e"/>
+    <circle cx="50" cy="110" r="1" fill="#ffd700"/>
+    <circle cx="50" cy="6" r="2.5" fill="#ffd700"><animate attributeName="r" values="2;3;2" dur="1.5s" repeatCount="indefinite"/></circle>
+    <line x1="50" y1="0" x2="50" y2="6" stroke="#ffd700" stroke-width="1"/>
+  </svg>`;
+}
+
+const Battle = {
+  active: false, paused: false,
+  phase: 'player_play',
+  month: 1, quarter: 1,
+  units: [], customers: [],
+  playerCash: 0, enemyCash: 0,
+  playerMv: 100, enemyMv: 100,
+  playerMaxMv: 100, enemyMaxMv: 100,
+  customersThisMatch: 0,
+  arenaRect: null, selectedCard: null,
+  bossRef: null,
+  angelUsesThisQuarter: 0, angelUsesAllowed: 2,
+  phaseTimer: TURN_TIME, lastTick: 0,
+  diffConfig: null,
+  marketEvent: null,      // حدث السوق الحالي
+  schedule: [],           // جدول العملاء للأشهر الثلاثة
+  resolveElapsed: 0,      // الوقت المنقضي في مرحلة القتال
+
+  start(boss) {
+    this.bossRef = boss;
+    this.diffConfig = DIFFICULTY[State.difficulty] || DIFFICULTY.medium;
+    this.angelUsesAllowed = this.diffConfig.angelUsesPerQuarter;
+    this.angelUsesThisQuarter = 0;
+
+    // اختيار حدث سوق عشوائي
+    this.marketEvent = MARKET_EVENTS[Math.floor(Math.random() * MARKET_EVENTS.length)];
+    const eff = this.marketEvent.effects || {};
+
+    // توليد جدول العملاء الشهري (3 أشهر)
+    this.schedule = this.generateSchedule(eff);
+
+    // تطبيق تأثيرات البداية
+    if (eff.extraAngelUses) this.angelUsesAllowed += eff.extraAngelUses;
+
+    this.active = true; this.paused = false;
+    this.phase = 'player_play';
+    this.month = 1;
+    this.quarter = Math.floor((State.level - 1) / 4) * 4 + ((State.level - 1) % 4) + 1;
+    this.units = []; this.customers = [];
+
+    // حساب الرصيد الابتدائي مع تأثيرات الحدث
+    let startCash = State.bankBalance;
+    if (eff.startCashMul) startCash = Math.round(startCash * eff.startCashMul);
+    this.playerCash = startCash;
+    this.enemyCash = 800;
+
+    // القيمة السوقية مع تأثيرات الحدث
+    let playerStartMv = 100;
+    let enemyStartMv = Math.round(boss.baseMv * this.diffConfig.enemyMvMul);
+    if (eff.enemyStartMvMul) enemyStartMv = Math.round(enemyStartMv * eff.enemyStartMvMul);
+    if (eff.bothStartMvMul) {
+      playerStartMv = Math.round(playerStartMv * eff.bothStartMvMul);
+      enemyStartMv = Math.round(enemyStartMv * eff.bothStartMvMul);
+    }
+    this.playerMaxMv = playerStartMv;
+    this.enemyMaxMv = enemyStartMv;
+    this.playerMv = this.playerMaxMv;
+    this.enemyMv = this.enemyMaxMv;
+
+    this.customersThisMatch = 0;
+    this.selectedCard = null;
+    this.phaseTimer = TURN_TIME;
+    this.lastTick = performance.now();
+    this.setupUI();
+    requestAnimationFrame(this.loop.bind(this));
+
+    // عرض بانر الحدث
+    this.showMarketEventBanner();
+
+    setTimeout(() => { if (!State.tutorialsSeen.battleIntro_done) Tutorial.start('battleIntro'); }, 2000);
+  },
+
+  // تكلفة بطاقة معدّلة حسب حدث السوق
+  getCardCost(key) {
+    const c = CARDS_DB[key];
+    const eff = (this.marketEvent && this.marketEvent.effects) || {};
+    let cost = c.cost;
+    if (eff.costOverride && eff.costOverride[key] !== undefined) cost = eff.costOverride[key];
+    if (eff.costMul && eff.costMul[key]) cost = Math.round(cost * eff.costMul[key]);
+    if (eff.costMulAll) cost = Math.round(cost * eff.costMulAll);
+    if (eff.costFlat) cost = Math.max(50, cost + eff.costFlat);
+    return cost;
+  },
+
+  // تأثير الوحدة معدّل حسب الحدث
+  getCardImpact(key) {
+    const c = CARDS_DB[key];
+    const eff = (this.marketEvent && this.marketEvent.effects) || {};
+    let impact = c.impact;
+    if (eff.impactMul && eff.impactMul[key]) impact = Math.round(impact * eff.impactMul[key]);
+    return impact;
+  },
+
+  showMarketEventBanner() {
+    const arena = document.getElementById('arena');
+    const ev = this.marketEvent;
+    const banner = document.createElement('div');
+    banner.className = 'market-event-banner';
+    banner.style.setProperty('--ev-color', ev.color);
+    banner.innerHTML = `
+      <div class="me-emoji">${ev.emoji}</div>
+      <div class="me-content">
+        <div class="me-label">📢 حدث السوق</div>
+        <div class="me-name">${ev.name}</div>
+        <div class="me-desc">${ev.desc}</div>
+      </div>
+    `;
+    arena.appendChild(banner);
+    Sound.play('bonus');
+    setTimeout(() => banner.classList.add('dismiss'), 3500);
+    setTimeout(() => banner.remove(), 4200);
+
+    // تحديث مؤشر الحدث الدائم
+    const indicator = document.getElementById('eventIndicator');
+    if (indicator) {
+      indicator.style.setProperty('--ev-color', ev.color);
+      indicator.innerHTML = `<span class="ev-dot">${ev.emoji}</span><span class="ev-name">${ev.name}</span>`;
+      indicator.style.display = 'flex';
+    }
+  },
+  generateSchedule(eff) {
+    const schedule = [];
+    const zoneIds = CUSTOMER_ZONES.map(z => z.id);
+    for (let m = 0; m < MONTHS_PER_MATCH; m++) {
+      // اختيار عدد المناطق النشطة هذا الشهر (1-3)
+      const spawnMul = eff.customerSpawnMul || 1;
+      const numActive = spawnMul > 1.5 ? 3 : (Math.random() > 0.5 ? 2 : 1);
+      // خلط المناطق واختيار
+      const shuffled = [...zoneIds].sort(() => Math.random() - 0.5);
+      const activeZones = shuffled.slice(0, numActive);
+
+      // عدد عملاء لكل منطقة نشطة (1-2)
+      const plannedCustomers = [];
+      activeZones.forEach((zoneId, zi) => {
+        const count = 1 + Math.floor(Math.random() * 2);
+        for (let i = 0; i < count; i++) {
+          const vipBoost = Math.random() < (eff.vipChance || 0);
+          const type = pickCustomerType(vipBoost);
+          // وقت وصول منتشر عبر مرحلة القتال (0.8 إلى 3.8 ثانية)
+          const arrivalTime = 0.8 + (plannedCustomers.length * 0.9) + Math.random() * 0.3;
+          plannedCustomers.push({
+            zone: zoneId, type, value: Math.round(type.value * (eff.customerValueMul || 1)),
+            arrivalTime, warned: false, spawned: false
+          });
+        }
+      });
+      schedule.push({ activeZones, plannedCustomers });
+    }
+    return schedule;
+  },
+
+  renderForecast() {
+    const container = document.getElementById('forecastBar');
+    if (!container) return;
+    const mIdx = this.month - 1;
+    if (mIdx >= this.schedule.length) { container.innerHTML = ''; return; }
+    const monthPlan = this.schedule[mIdx];
+    // تجميع العملاء لكل منطقة
+    const byZone = {};
+    monthPlan.plannedCustomers.forEach(p => {
+      if (!byZone[p.zone]) byZone[p.zone] = [];
+      byZone[p.zone].push(p);
+    });
+    let html = `<span class="fc-label">📅 ${this.getMonthName()}:</span>`;
+    monthPlan.activeZones.forEach(zId => {
+      const zone = getZone(zId);
+      const list = byZone[zId] || [];
+      const icons = list.filter(p => !p.spawned).map(p => p.type.emoji).join('');
+      html += `<span class="fc-zone" style="--z-color:${zone.color}">${zone.emoji} <span class="fc-icons">${icons || '✓'}</span></span>`;
+    });
+    container.innerHTML = html;
+  },
+
+  highlightActiveZones() {
+    const mIdx = this.month - 1;
+    if (mIdx >= this.schedule.length) return;
+    const monthPlan = this.schedule[mIdx];
+    CUSTOMER_ZONES.forEach(z => {
+      const el = document.querySelector(`.market-zone[data-zone="${z.id}"]`);
+      if (el) el.classList.toggle('active', monthPlan.activeZones.includes(z.id));
+      const portal = document.querySelector(`.portal[data-zone="${z.id}"]`);
+      if (portal) portal.classList.toggle('active', monthPlan.activeZones.includes(z.id));
+    });
+  },
+
+  getMonthName() { const idx = (this.quarter - 1) * 3 + (this.month - 1); return MONTHS[idx % 12]; },
+  getQuarterName() { return QUARTERS[(this.quarter - 1) % 4]; },
+  setupUI() {
+    document.getElementById('enemyName').textContent = this.bossRef.name;
+    document.getElementById('enemyBuilding').innerHTML = buildingSVG(this.bossRef.stage, true);
+    const playerStage = State.level < 25 ? 1 : State.level < 50 ? 2 : State.level < 75 ? 3 : 4;
+    document.getElementById('playerBuilding').innerHTML = buildingSVG(playerStage, false);
+    this.renderCards();
+    this.updateBars();
+    this.arenaRect = document.getElementById('arena').getBoundingClientRect();
+    this.updatePhaseUI();
+    this.updateMonthUI();
+    this.positionZones();
+    this.renderForecast();
+    this.highlightActiveZones();
+  },
+
+  // ضبط مواقع المناطق والبوابات بناءً على حجم الساحة
+  positionZones() {
+    const rect = this.arenaRect;
+    CUSTOMER_ZONES.forEach(z => {
+      const el = document.querySelector(`.market-zone[data-zone="${z.id}"]`);
+      if (el) {
+        const width = (z.xEnd - z.xStart) * rect.width;
+        el.style.right = `${z.xStart * rect.width}px`;
+        el.style.width = `${width}px`;
+      }
+      const portal = document.querySelector(`.portal[data-zone="${z.id}"]`);
+      if (portal) {
+        portal.style.right = `${((z.xStart + z.xEnd) / 2) * rect.width}px`;
+      }
+    });
+  },
+  updateMonthUI() {
+    document.getElementById('monthLabel').textContent = this.getMonthName();
+    document.getElementById('monthNum').textContent = this.month;
+    document.getElementById('quarterLabel').textContent = this.getQuarterName();
+    document.getElementById('customersCount').textContent = this.customersThisMatch;
+  },
+  renderCards() {
+    const row = document.getElementById('cardsRow');
+    row.innerHTML = '';
+    State.deck.forEach(key => {
+      const c = CARDS_DB[key];
+      const cost = this.getCardCost(key);
+      const discounted = cost < c.cost;
+      const el = document.createElement('div');
+      el.className = 'card' + (discounted ? ' event-discount' : '');
+      el.dataset.key = key;
+      el.innerHTML = `
+        <div class="cost">${cost} <span class="c">ر.س</span>${discounted ? '<span class="evt-mark">✨</span>' : ''}</div>
+        <div class="emoji-wrap"><div class="emoji">${c.emoji}</div></div>
+        <div class="name">${c.name}</div>
+        <div class="desc">${c.desc}</div>
+      `;
+      el.addEventListener('click', () => this.selectCard(key, el));
+      row.appendChild(el);
+    });
+    this.updateCardStates();
+  },
+  selectCard(key, el) {
+    if (this.phase !== 'player_play') { toast('⏳ انتظر دورك!', 'warn'); return; }
+    const c = CARDS_DB[key];
+    const cost = this.getCardCost(key);
+    if (this.playerCash < cost) { toast('🏦 رصيد الشركة غير كافٍ!', 'err'); return; }
+    if (key === 'angel') {
+      if (this.angelUsesThisQuarter >= this.angelUsesAllowed) {
+        toast(`👼 استخدمت المستثمر ${this.angelUsesAllowed} مرات بالفعل!`, 'err');
+        return;
+      }
+      if (!State.tutorialsSeen.angelCard_done) Tutorial.start('angelCard');
+    }
+    if (c.role === 'spell_cash') {
+      this.playerCash -= cost;
+      this.playerCash += ANGEL_BOOST;
+      this.angelUsesThisQuarter++;
+      Sound.play('angel');
+      toast(`👼 +${ANGEL_BOOST} ر.س (${this.angelUsesAllowed - this.angelUsesThisQuarter} متبقية)`, 'warn');
+      this.updateBars(); this.updateCardStates();
+      return;
+    }
+    if (c.role === 'spell_erode') {
+      this.playerCash -= cost;
+      const enemies = this.units.filter(u => u.side === 'enemy');
+      if (enemies.length === 0) {
+        toast('⚠️ لا يوجد مبادرات للمنافس', 'warn');
+        this.playerCash += cost;
+        return;
+      }
+      enemies.forEach(u => {
+        u.mv -= 30;
+        this.showImpact(u.x, u.y, 30);
+        this.spawnParticles(u.x, u.y, '#ffd700');
+      });
+      this.showChartFx(this.arenaRect.width/2, this.arenaRect.height/2, '📉', '#ff4757');
+      Sound.play('patent');
+      toast('📜 براءة اختراع نفذت!', 'warn');
+      this.updateBars(); this.updateCardStates();
+      return;
+    }
+    if (this.selectedCard === key) {
+      this.selectedCard = null;
+      this.clearSelection();
+      Sound.play('click');
+    } else {
+      this.selectedCard = key;
+      document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
+      el.classList.add('selected');
+      document.getElementById('arena').classList.add('deploying');
+      document.getElementById('selectorHint').textContent = `✅ ${c.name} (${cost} ر.س) — انقر في ملعبك`;
+      Sound.play('select');
+      if (!State.tutorialsSeen.deployment_done) Tutorial.start('deployment');
+    }
+  },
+  clearSelection() {
+    document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
+    document.getElementById('arena').classList.remove('deploying');
+    if (this.phase === 'player_play') {
+      document.getElementById('selectorHint').textContent = 'دورك! اختر مبادرة ثم انقر في ملعبك';
+    }
+  },
+  spawnUnit(key, x, y, side) {
+    const c = CARDS_DB[key];
+    const impact = this.getCardImpact(key);
+    const arena = document.getElementById('arena');
+    const el = document.createElement('div');
+    el.className = `unit ${side} ghost`;
+    el.innerHTML = `<div class="unit-body"><span class="emoji">${c.emoji}</span></div><div class="mv-mini" style="--mv:100%"></div>`;
+    arena.appendChild(el);
+    const unit = { el, key, side, x, y, mv: c.mv, maxMv: c.mv, impact: impact, speed: c.speed, range: c.range, attackCooldown: 0, target: null, dead: false };
+    this.units.push(unit);
+    el.style.right = `${x}px`;
+    el.style.top = `${y}px`;
+    el.style.transform = 'translate(50%, -50%)';
+    this.spawnParticles(x, y, side === 'player' ? '#2ecc71' : '#ff4757');
+    this.spawnMarketRing(x, y, side);
+  },
+  deployUnit(key, x, y, side) {
+    const c = CARDS_DB[key];
+    if (c.role === 'swarm') {
+      const eff = (this.marketEvent && this.marketEvent.effects) || {};
+      const count = eff.swarmCount || 3;
+      for (let i = 0; i < count; i++) this.spawnUnit(key, x + (i - (count - 1) / 2) * 35, y, side);
+    } else {
+      this.spawnUnit(key, x, y, side);
+    }
+  },
+  playerDeploy(e) {
+    if (this.phase !== 'player_play' || !this.selectedCard) return;
+    const rect = this.arenaRect;
+    const mid = rect.height / 2;
+    const clientX = e.clientX ?? (e.changedTouches && e.changedTouches[0]?.clientX);
+    const clientY = e.clientY ?? (e.changedTouches && e.changedTouches[0]?.clientY);
+    if (clientX === undefined) return;
+    const x = rect.right - clientX;
+    const y = clientY - rect.top;
+    if (y < mid + 10) { toast('⛔ ملعبك هو النصف السفلي', 'err'); return; }
+    const selectedKey = this.selectedCard;
+    const c = CARDS_DB[selectedKey];
+    const cost = this.getCardCost(selectedKey);
+    this.playerCash -= cost;
+    this.deployUnit(selectedKey, x, y, 'player');
+    Sound.play('deploy');
+    this.updateBars();
+    // الحفاظ على اختيار البطاقة إن كان الرصيد ما زال يكفي — يمكن إطلاق أكثر من وحدة
+    if (this.playerCash >= cost) {
+      const el = document.querySelector(`.card[data-key="${selectedKey}"]`);
+      document.getElementById('selectorHint').textContent =
+        `✅ ${c.name} (${cost} ر.س) — انقر مجدداً لإطلاق المزيد، أو اضغط البطاقة لإلغاء الاختيار`;
+      this.updateCardStates();
+      if (el) el.classList.add('selected');
+    } else {
+      // نفد الرصيد لهذه البطاقة — ألغِ الاختيار تلقائياً
+      this.selectedCard = null;
+      this.clearSelection();
+      this.updateCardStates();
+      toast(`💵 الرصيد لا يكفي لإطلاق ${c.name} مجدداً`, 'warn');
+    }
+  },
+  updateCardStates() {
+    document.querySelectorAll('.card').forEach(el => {
+      const key = el.dataset.key;
+      const cost = this.getCardCost(key);
+      let canAfford = this.playerCash >= cost && this.phase === 'player_play';
+      if (key === 'angel' && this.angelUsesThisQuarter >= this.angelUsesAllowed) canAfford = false;
+      el.classList.toggle('affordable', canAfford);
+      el.classList.toggle('disabled', !canAfford);
+    });
+    document.getElementById('endTurnBtn').disabled = this.phase !== 'player_play';
+  },
+  updateBars() {
+    document.getElementById('bankValue').textContent = Math.max(0, Math.floor(this.playerCash)).toLocaleString('ar-SA');
+    document.getElementById('playerMv').style.width = `${Math.max(0, this.playerMv / this.playerMaxMv) * 100}%`;
+    document.getElementById('enemyMv').style.width = `${Math.max(0, this.enemyMv / this.enemyMaxMv) * 100}%`;
+    document.getElementById('playerMvLabel').textContent = Math.max(0, Math.ceil(this.playerMv));
+    document.getElementById('enemyMvLabel').textContent = Math.max(0, Math.ceil(this.enemyMv));
+    document.getElementById('customersCount').textContent = this.customersThisMatch;
+  },
+  updatePhaseUI() {
+    const ind = document.getElementById('turnIndicator');
+    const lbl = document.getElementById('phaseLabel');
+    const cd = document.getElementById('countdown');
+    ind.classList.remove('enemy-turn', 'resolve', 'urgent');
+    if (this.phase === 'player_play') {
+      lbl.textContent = `اختر (${this.month}/3)`;
+      cd.textContent = Math.ceil(this.phaseTimer);
+      if (this.phaseTimer <= 5) ind.classList.add('urgent');
+    } else if (this.phase === 'enemy_play') {
+      ind.classList.add('enemy-turn');
+      lbl.textContent = 'دور المنافس';
+      cd.textContent = '🤖';
+    } else if (this.phase === 'resolve') {
+      ind.classList.add('resolve');
+      lbl.textContent = 'السوق يتحرك!';
+      cd.textContent = '📊';
+    }
+  },
+  endPlayerTurn() {
+    if (this.phase !== 'player_play') return;
+    Sound.play('click');
+    this.selectedCard = null;
+    this.clearSelection();
+    this.phase = 'enemy_play';
+    this.phaseTimer = 2.5;
+    this.updatePhaseUI();
+    document.getElementById('selectorHint').textContent = '🤖 المنافس يخطط...';
+    this.showEnemyThinking();
+    setTimeout(() => this.runEnemyAI(), 1000);
+  },
+  showEnemyThinking() {
+    const arena = document.getElementById('arena');
+    const bubble = document.createElement('div');
+    bubble.className = 'enemy-thinking';
+    bubble.id = 'enemyThinkBubble';
+    bubble.innerHTML = `<div class="bubble">🤔 ${this.bossRef.name} يدرس السوق...</div>`;
+    arena.appendChild(bubble);
+  },
+  clearEnemyThinking() {
+    const b = document.getElementById('enemyThinkBubble');
+    if (b) b.remove();
+  },
+  runEnemyAI() {
+    const boss = this.bossRef;
+    const maxPlays = this.diffConfig.enemyCardsPerTurn;
+    let plays = 0;
+    this.enemyCash += this.diffConfig.enemyMonthlyIncome;
+    const tryPlay = () => {
+      if (!this.active) return;
+      if (plays >= maxPlays) { this.clearEnemyThinking(); this.startResolve(); return; }
+      const pool = boss.deckPool;
+      let pick = pool[Math.floor(Math.random() * pool.length)];
+      let c = CARDS_DB[pick];
+      if (boss.strategy === 'swarm') { pick = Math.random() > 0.5 ? 'salesrep' : 'discount'; c = CARDS_DB[pick]; }
+      else if (boss.strategy === 'monopoly') { pick = Math.random() > 0.5 ? 'monopoly' : 'premium'; c = CARDS_DB[pick]; }
+      else if (boss.strategy === 'pricedump') { pick = Math.random() > 0.5 ? 'discount' : 'viral'; c = CARDS_DB[pick]; }
+      const enemyCost = this.getCardCost(pick);
+      if (this.enemyCash >= enemyCost && c.role !== 'spell_cash' && c.role !== 'spell_erode') {
+        this.enemyCash -= enemyCost;
+        const rect = this.arenaRect;
+        const x = (Math.random() * 0.5 + 0.25) * rect.width;
+        const y = rect.height * (0.12 + Math.random() * 0.3);
+        this.deployUnit(pick, x, y, 'enemy');
+        plays++;
+        setTimeout(tryPlay, 700);
+      } else {
+        this.clearEnemyThinking(); this.startResolve();
+      }
+    };
+    tryPlay();
+  },
+  startResolve() {
+    this.phase = 'resolve';
+    this.phaseTimer = 5.5;
+    this.resolveElapsed = 0;
+    this.updatePhaseUI();
+    document.getElementById('selectorHint').textContent = '📊 السوق يتفاعل — شاهد النتائج!';
+    this.units.forEach(u => u.el.classList.remove('ghost'));
+    if (!State.tutorialsSeen.customers_done && this.month === 1) {
+      setTimeout(() => Tutorial.start('customers'), 500);
+    }
+  },
+
+  // تشغيل جدول العملاء أثناء مرحلة القتال
+  tickSchedule(dt) {
+    const mIdx = this.month - 1;
+    if (mIdx >= this.schedule.length) return;
+    const plan = this.schedule[mIdx];
+    this.resolveElapsed += dt;
+    plan.plannedCustomers.forEach(p => {
+      if (p.spawned) return;
+      // تحذير قبل 1.2 ثانية من الظهور
+      if (!p.warned && this.resolveElapsed >= p.arrivalTime - 1.2) {
+        p.warned = true;
+        this.showIncomingWarning(p.zone, p.type);
+      }
+      if (this.resolveElapsed >= p.arrivalTime) {
+        p.spawned = true;
+        this.spawnCustomer(p.zone, p.type, p.value);
+        this.renderForecast();
+      }
+    });
+  },
+  spawnCustomer(zoneId, type, value) {
+    const rect = this.arenaRect;
+    const arena = document.getElementById('arena');
+    // إذا لم تحدد المنطقة، اختر عشوائية
+    if (!zoneId) zoneId = CUSTOMER_ZONES[Math.floor(Math.random() * 3)].id;
+    if (!type) {
+      const eff = (this.marketEvent && this.marketEvent.effects) || {};
+      type = pickCustomerType(eff.vipChance && Math.random() < eff.vipChance);
+      value = Math.round(type.value * (eff.customerValueMul || 1));
+    }
+    const zone = getZone(zoneId);
+
+    const el = document.createElement('div');
+    el.className = `unit customer type-${type.id} emerging`;
+    el.style.setProperty('--c-color', type.color);
+    el.style.setProperty('--c-size', type.size);
+    el.innerHTML = `
+      <div class="unit-body"><span class="emoji">${type.emoji}</span></div>
+      <div class="c-value">${value} ر.س</div>
+      ${type.id === 'vip' || type.id === 'whale' ? '<div class="c-crown">★</div>' : ''}
+    `;
+    arena.appendChild(el);
+
+    // موقع البوابة (أعلى المنطقة) وموقع المركز (وسط المنطقة)
+    const zoneCenter = ((zone.xStart + zone.xEnd) / 2) * rect.width;
+    const portalY = rect.height * 0.42;  // حافة علوية لشريط العملاء
+    const targetY = rect.height * 0.5;   // مركز شريط العملاء
+
+    const customer = {
+      el, zone: zoneId,
+      x: zoneCenter,
+      y: portalY,
+      targetX: zoneCenter,
+      targetY: targetY,
+      walkSpeed: 35,  // بكسل/ثانية
+      arrived: false,
+      dead: false,
+      type, value
+    };
+    this.customers.push(customer);
+    el.style.right = `${customer.x}px`;
+    el.style.top = `${customer.y}px`;
+    el.style.transform = 'translate(50%, -50%)';
+
+    // تأثير خروج من البوابة
+    const portalEl = document.querySelector(`.portal[data-zone="${zoneId}"]`);
+    if (portalEl) {
+      portalEl.classList.add('open');
+      setTimeout(() => portalEl.classList.remove('open'), 800);
+    }
+    setTimeout(() => el.classList.remove('emerging'), 300);
+  },
+
+  // إظهار تحذير عميل قادم قبل ظهوره
+  showIncomingWarning(zoneId, type) {
+    const portalEl = document.querySelector(`.portal[data-zone="${zoneId}"]`);
+    if (!portalEl) return;
+    portalEl.classList.add('incoming');
+    const ghost = document.createElement('div');
+    ghost.className = 'incoming-ghost';
+    ghost.style.setProperty('--c-color', type.color);
+    ghost.innerHTML = `${type.emoji}<div class="arrow">↓</div>`;
+    portalEl.appendChild(ghost);
+    setTimeout(() => {
+      portalEl.classList.remove('incoming');
+      ghost.remove();
+    }, 1500);
+  },
+  resolveCombat(dt) {
+    const rect = this.arenaRect;
+    // تشغيل جدول ظهور العملاء
+    this.tickSchedule(dt);
+
+    // تحريك العملاء من البوابة إلى مركز المنطقة
+    this.customers.forEach(c => {
+      if (c.dead || c.arrived) return;
+      const dy = c.targetY - c.y;
+      if (Math.abs(dy) > 1) {
+        c.y += Math.sign(dy) * c.walkSpeed * dt;
+        c.el.style.top = `${c.y}px`;
+      } else {
+        c.arrived = true;
+      }
+    });
+
+    this.units.forEach(u => {
+      if (u.dead || u.mv <= 0) return;
+      if (!u.target || (u.target.mv !== undefined && u.target.mv <= 0) || u.target.dead) {
+        u.target = this.findTarget(u);
+      }
+      const tx = u.target ? (u.target === 'base' ? rect.width/2 : u.target.x) : rect.width/2;
+      const ty = u.target ? (u.target === 'base' ? (u.side === 'player' ? 30 : rect.height - 30) : u.target.y) : rect.height/2;
+      const dx = tx - u.x, dy = ty - u.y;
+      const dist = Math.hypot(dx, dy);
+      if (dist > u.range) {
+        const mv = u.speed * dt;
+        u.x += (dx / dist) * mv;
+        u.y += (dy / dist) * mv;
+      } else {
+        u.attackCooldown -= dt;
+        if (u.attackCooldown <= 0) {
+          u.attackCooldown = 0.9;
+          u.el.classList.add('launching');
+          setTimeout(() => u.el?.classList.remove('launching'), 300);
+          this.spawnMarketRing(u.x, u.y, u.side);
+          if (u.target === 'base') {
+            const base = u.side === 'player' ? document.getElementById('enemyBase') : document.getElementById('playerBase');
+            base.classList.add('damaged');
+            setTimeout(() => base.classList.remove('damaged'), 400);
+            Sound.play('impact');
+            if (u.side === 'player') {
+              this.enemyMv -= u.impact;
+              this.showImpact(rect.width/2, 30, u.impact);
+              this.showChartFx(rect.width/2, 40, '📉', '#ff4757');
+            } else {
+              this.playerMv -= u.impact;
+              this.showImpact(rect.width/2, rect.height - 30, u.impact);
+              this.showChartFx(rect.width/2, rect.height - 40, '📉', '#ff4757');
+              this.shakeArena();
+            }
+            this.spawnParticles(tx, ty, '#ffd700');
+          } else if (u.target && u.target.mv !== undefined) {
+            u.target.mv -= u.impact;
+            this.showImpact(u.target.x, u.target.y, u.impact);
+            this.spawnParticles(u.target.x, u.target.y, '#ffd700');
+          }
+        }
+      }
+      u.el.style.right = `${u.x}px`;
+      u.el.style.top = `${u.y}px`;
+      const mvBar = u.el.querySelector('.mv-mini');
+      if (mvBar) mvBar.style.setProperty('--mv', `${Math.max(0, u.mv / u.maxMv) * 100}%`);
+    });
+    this.customers.forEach(cust => {
+      if (cust.dead) return;
+      let nearest = null, minDist = Infinity;
+      this.units.forEach(u => {
+        if (u.dead || u.mv <= 0) return;
+        const d = Math.hypot(u.x - cust.x, u.y - cust.y);
+        if (d < minDist && d < 90) { minDist = d; nearest = u; }
+      });
+      if (nearest) {
+        if (nearest.side === 'player') {
+          this.customersThisMatch++;
+          // العملاء الثمينون يؤثرون أكثر على المنافس
+          const damage = cust.type && cust.type.value >= 200 ? 5 : 2;
+          this.enemyMv -= damage;
+          const label = cust.type ? `+${cust.value} ر.س ${cust.type.emoji}` : 'عميل جديد!';
+          this.showImpact(cust.x, cust.y - 10, label, 'gain', true);
+          this.spawnCustomerTrail(cust.x, cust.y, nearest.x, nearest.y);
+          // مكافأة فورية للرصيد (نصف قيمة العميل)
+          if (cust.value) {
+            const instant = Math.round(cust.value * 0.5);
+            this.playerCash += instant;
+          }
+          Sound.play('customer');
+        } else {
+          this.playerMv -= 2;
+          this.showImpact(cust.x, cust.y - 10, 'عميل مفقود', null, true);
+          this.shakeArena();
+          Sound.play('impact');
+        }
+        this.showCoin(cust.x, cust.y);
+        this.spawnParticles(cust.x, cust.y, '#ffd700');
+        cust.dead = true;
+        cust.el.classList.add('dying');
+        setTimeout(() => cust.el.remove(), 500);
+      }
+    });
+    this.units = this.units.filter(u => {
+      if (u.dead || u.mv <= 0) {
+        if (!u.el.classList.contains('dying')) {
+          u.el.classList.add('dying');
+          setTimeout(() => u.el.remove(), 500);
+        }
+        return false;
+      }
+      return true;
+    });
+    this.customers = this.customers.filter(c => !c.dead);
+    this.updateBars();
+  },
+  findTarget(u) {
+    const enemies = this.units.filter(o => !o.dead && o.mv > 0 && o.side !== u.side && o.side !== 'neutral');
+    let best = null, minDist = Infinity;
+    enemies.forEach(e => {
+      const d = Math.hypot(e.x - u.x, e.y - u.y);
+      if (d < minDist && d < 140) { minDist = d; best = e; }
+    });
+    if (best) return best;
+    return 'base';
+  },
+  showImpact(x, y, value, type, isText) {
+    const arena = document.getElementById('arena');
+    const el = document.createElement('div');
+    el.className = 'impact-popup' + (type ? ' ' + type : '');
+    el.textContent = isText ? value : `-${Math.round(value)}`;
+    el.style.right = `${x}px`;
+    el.style.top = `${y - 20}px`;
+    arena.appendChild(el);
+    setTimeout(() => el.remove(), 900);
+  },
+  showCoin(x, y) {
+    const arena = document.getElementById('arena');
+    const el = document.createElement('div');
+    el.className = 'coin-fx';
+    el.textContent = '💰';
+    el.style.right = `${x}px`;
+    el.style.top = `${y}px`;
+    arena.appendChild(el);
+    setTimeout(() => el.remove(), 1200);
+  },
+  showChartFx(x, y, emoji, color) {
+    const arena = document.getElementById('arena');
+    const el = document.createElement('div');
+    el.className = 'chart-fx';
+    el.textContent = emoji;
+    el.style.color = color || '#ffd700';
+    el.style.right = `${x - 10}px`;
+    el.style.top = `${y - 10}px`;
+    arena.appendChild(el);
+    setTimeout(() => el.remove(), 600);
+  },
+  spawnMarketRing(x, y, side) {
+    const arena = document.getElementById('arena');
+    const el = document.createElement('div');
+    el.className = `market-ring ${side}`;
+    el.style.right = `${x}px`;
+    el.style.top = `${y}px`;
+    arena.appendChild(el);
+    setTimeout(() => el.remove(), 700);
+  },
+  spawnCustomerTrail(x1, y1, x2, y2) {
+    const arena = document.getElementById('arena');
+    const el = document.createElement('div');
+    el.className = 'customer-trail';
+    const dx = x2 - x1, dy = y2 - y1;
+    const len = Math.hypot(dx, dy);
+    const angle = Math.atan2(dy, dx);
+    el.style.right = `${x1}px`;
+    el.style.top = `${y1}px`;
+    el.style.width = `${len}px`;
+    el.style.transform = `rotate(${-angle}rad)`;
+    arena.appendChild(el);
+    setTimeout(() => el.remove(), 800);
+  },
+  spawnParticles(x, y, color) {
+    const arena = document.getElementById('arena');
+    for (let i = 0; i < 6; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      p.style.background = color;
+      p.style.right = `${x}px`;
+      p.style.top = `${y}px`;
+      const angle = (Math.PI * 2 * i) / 6 + Math.random() * 0.5;
+      const dist = 20 + Math.random() * 20;
+      p.style.setProperty('--dx', `${Math.cos(angle) * dist}px`);
+      p.style.setProperty('--dy', `${Math.sin(angle) * dist}px`);
+      arena.appendChild(p);
+      setTimeout(() => p.remove(), 800);
+    }
+  },
+  shakeArena() {
+    const arena = document.getElementById('arena');
+    arena.classList.remove('shake');
+    void arena.offsetWidth;
+    arena.classList.add('shake');
+    setTimeout(() => arena.classList.remove('shake'), 300);
+  },
+  loop(now) {
+    if (!this.active) return;
+    if (!this.paused) {
+      const dt = Math.min(0.1, (now - this.lastTick) / 1000);
+      this.update(dt);
+    }
+    this.lastTick = now;
+    if (this.active) requestAnimationFrame(this.loop.bind(this));
+  },
+  update(dt) {
+    this.phaseTimer -= dt;
+    if (this.phase === 'player_play') {
+      // tick sound في آخر 5 ثواني (كل ثانية)
+      const nowSec = Math.ceil(this.phaseTimer);
+      if (this.phaseTimer > 0 && this.phaseTimer <= 5 && nowSec !== Sound.lastTickTime) {
+        Sound.lastTickTime = nowSec;
+        Sound.play('tick');
+      }
+      if (this.phaseTimer <= 0) this.endPlayerTurn();
+      else this.updatePhaseUI();
+    } else if (this.phase === 'resolve') {
+      this.resolveCombat(dt);
+      if (this.phaseTimer <= 0) {
+        if (this.checkEnd()) return;
+        this.startNextMonth();
+      }
+    }
+    this.checkEnd();
+  },
+  startNextMonth() {
+    this.month++;
+    if (this.month > MONTHS_PER_MATCH) { this.endQuarter(); return; }
+    this.phase = 'player_play';
+    this.phaseTimer = TURN_TIME;
+    const eff = (this.marketEvent && this.marketEvent.effects) || {};
+    let monthlyIncome = MONTHLY_INCOME;
+    if (eff.incomeMul) monthlyIncome = Math.round(monthlyIncome * eff.incomeMul);
+    this.playerCash += monthlyIncome;
+    Sound.play('newMonth');
+    this.updatePhaseUI(); this.updateCardStates(); this.updateBars(); this.updateMonthUI();
+    this.renderForecast();
+    this.highlightActiveZones();
+    document.getElementById('selectorHint').textContent = `📅 بداية شهر ${this.getMonthName()} - +${MONTHLY_INCOME} ر.س دخل تشغيلي`;
+    toast(`📅 ${this.getMonthName()} - دخل +${monthlyIncome} ر.س`, 'warn');
+  },
+  checkEnd() {
+    if (this.playerMv <= 0) { this.end('lose'); return true; }
+    if (this.enemyMv <= 0) { this.end('win'); return true; }
+    return false;
+  },
+  endQuarter() {
+    const playerScore = this.playerMv + (this.customersThisMatch * 10);
+    const enemyScore = this.enemyMv * 0.5;
+    if (playerScore > enemyScore) this.end('win');
+    else this.end('lose');
+  },
+  end(result) {
+    if (!this.active) return;
+    this.active = false;
+    this.phase = 'ended';
+    document.querySelectorAll('.unit').forEach(u => u.remove());
+    this.units = []; this.customers = [];
+    const breakdown = this.calculateQuarterReport(result);
+    const oldBank = State.bankBalance;
+    State.bankBalance = Math.max(0, this.playerCash + breakdown.netProfit);
+    breakdown.oldBank = oldBank;
+    breakdown.newBank = State.bankBalance;
+    breakdown.cashSpent = oldBank - this.playerCash;
+    if (result === 'win' || this.customersThisMatch > 0) {
+      State.totalCustomers += this.customersThisMatch;
+    }
+    if (result === 'win') {
+      State.totalWins += 1;
+      if (!State.completedLevels.includes(this.bossRef.id)) {
+        State.completedLevels.push(this.bossRef.id);
+        if (this.bossRef.id === State.level) {
+          State.level = Math.min(100, State.level + 1);
+          breakdown.levelUp = true;
+        }
+        if (State.totalWins % 3 === 0) {
+          const locked = Object.keys(CARDS_DB).filter(k => !State.unlockedCards.includes(k));
+          if (locked.length) {
+            breakdown.newCard = locked[0];
+            State.unlockedCards.push(breakdown.newCard);
+          }
+        }
+      }
+    } else {
+      State.totalLosses++;
+    }
+    State.save();
+    Sound.play(result === 'win' ? 'win' : 'lose');
+    if (breakdown.newCard) setTimeout(() => Sound.play('bonus'), 1200);
+    setTimeout(() => this.showResult(result, breakdown), 600);
+  },
+  calculateQuarterReport(result) {
+    const eff = (this.marketEvent && this.marketEvent.effects) || {};
+    const eventRewardMul = eff.rewardMul || 1;
+    const baseReward = result === 'win'
+      ? Math.round(this.bossRef.baseReward * this.diffConfig.rewardMul * eventRewardMul)
+      : Math.round(this.bossRef.baseReward * 0.15 * this.diffConfig.rewardMul);
+    const saasRevenue = this.customersThisMatch * SAAS_PER_CUSTOMER;
+    const recurringRevenue = State.totalCustomers * SAAS_PER_CUSTOMER;
+    const gross = baseReward + saasRevenue + recurringRevenue;
+    const investorCut = this.angelUsesThisQuarter > 0 ? Math.round(gross * 0.3) : 0;
+    const netProfit = gross - investorCut;
+    return {
+      baseReward, saasRevenue, recurringRevenue, gross,
+      investorCut, netProfit,
+      customers: this.customersThisMatch,
+      totalCustomers: State.totalCustomers + this.customersThisMatch,
+      angelUsed: this.angelUsesThisQuarter > 0,
+      angelUsesCount: this.angelUsesThisQuarter,
+      marketEvent: this.marketEvent,
+      levelUp: false, newCard: null
+    };
+  },
+  showResult(result, breakdown) {
+    const emoji = document.getElementById('resultEmoji');
+    const title = document.getElementById('resultTitle');
+    const subtitle = document.getElementById('resultSubtitle');
+    const mentor = document.getElementById('mentorWrap');
+    const reportWrap = document.getElementById('quarterReportWrap');
+    const nextLabel = document.getElementById('nextBtnLabel');
+
+    if (result === 'win') {
+      emoji.textContent = '🏆';
+      title.textContent = `${this.getQuarterName()} — تفوّق!`;
+      subtitle.textContent = `تقرير ربع السنة بعد 3 أشهر من المنافسة مع ${this.bossRef.name}`;
+      mentor.innerHTML = `<div class="mentor-box"><div class="mentor-avatar">👨‍🏫</div><div class="mentor-text"><strong>المرشد يوسف:</strong>${breakdown.levelUp ? 'ممتاز! الأرباح ممتازة وتوسّعت شركتك. استمر!' : 'ربع ناجح! بنيت قاعدة عملاء قيّمة.'}</div></div>`;
+    } else {
+      emoji.textContent = '📉';
+      title.textContent = `${this.getQuarterName()} — تحدٍ صعب`;
+      subtitle.textContent = 'الشركة تعاني هذا الربع، لكن التجربة قيّمة';
+      const lessons = [
+        'أنفقت رصيدك بسرعة قبل بناء قاعدة عملاء. ادّخر للطوارئ!',
+        'ركّزت على التسويق دون المنتج. سوّق ما تستطيع تسليمه.',
+        'المستثمر الملائكي استخدمته مبكراً وكلّفك 30% من أرباحك.',
+        'اخلط بطاقات رخيصة سريعة مع فاخرة قوية. التنوع هو السر.'
+      ];
+      const lesson = lessons[Math.floor(Math.random() * lessons.length)];
+      mentor.innerHTML = `<div class="mentor-box"><div class="mentor-avatar">👨‍🏫</div><div class="mentor-text"><strong>المرشد يوسف:</strong>${lesson}</div></div>`;
+    }
+
+    const fmt = n => Math.round(n).toLocaleString('ar-SA');
+    let reportHTML = `<div class="quarter-report">`;
+    if (breakdown.marketEvent) {
+      reportHTML += `<div class="quarter-row" style="background:rgba(107,127,255,0.12);border-radius:8px;padding:10px;margin-bottom:6px;border:1px solid rgba(107,127,255,0.3);">
+          <span class="label">${breakdown.marketEvent.emoji} حدث الربع:</span>
+          <span class="value" style="color:${breakdown.marketEvent.color};font-size:13px;">${breakdown.marketEvent.name}</span>
+        </div>`;
+    }
+    reportHTML += `<div class="quarter-row"><span class="label">🏆 مكافأة التفوق التجاري:</span><span class="value">${fmt(breakdown.baseReward)} <span class="currency">ر.س</span></span></div>`;
+    reportHTML += `<div class="quarter-row"><span class="label">🧑 عملاء جدد (${breakdown.customers} × ${SAAS_PER_CUSTOMER}):</span><span class="value">${fmt(breakdown.saasRevenue)} <span class="currency">ر.س</span></span></div>`;
+    if (breakdown.recurringRevenue > 0) {
+      reportHTML += `<div class="quarter-row"><span class="label">📈 إيراد متكرر من ${State.totalCustomers - breakdown.customers} عميل قديم:</span><span class="value">${fmt(breakdown.recurringRevenue)} <span class="currency">ر.س</span></span></div>`;
+    }
+    reportHTML += `<div class="quarter-row subtotal"><span class="label">💼 إجمالي الأرباح:</span><span class="value">${fmt(breakdown.gross)} <span class="currency">ر.س</span></span></div>`;
+    if (breakdown.angelUsed) {
+      reportHTML += `<div class="quarter-row deduction"><span class="label">👼 خصم المستثمر (×${breakdown.angelUsesCount} - 30%):</span><span class="value">-${fmt(breakdown.investorCut)} <span class="currency">ر.س</span></span></div>`;
+    } else {
+      reportHTML += `<div class="quarter-row"><span class="label">👼 خصم المستثمرين:</span><span class="value" style="color:#2ecc71;">لا يوجد</span></div>`;
+    }
+    reportHTML += `<div class="quarter-row final"><span class="label">🏦 الربح النهائي للربع:</span><span class="value">${fmt(breakdown.netProfit)} <span class="currency">ر.س</span></span></div>`;
+    reportHTML += `<div class="quarter-row newbalance"><span class="label">💳 الرصيد الجديد (بعد خصم ${fmt(breakdown.cashSpent)} ر.س مصروفات):</span><span class="value">${fmt(breakdown.newBank)} <span class="currency">ر.س</span></span></div>`;
+    if (breakdown.newCard) {
+      reportHTML += `<div class="quarter-row" style="background:rgba(46,204,113,0.1);border-radius:8px;padding:10px;margin-top:8px;"><span class="label">🎁 مبادرة جديدة:</span><span class="value" style="color:#2ecc71;">${CARDS_DB[breakdown.newCard].emoji} ${CARDS_DB[breakdown.newCard].name}</span></div>`;
+    }
+    reportHTML += `</div>`;
+    reportWrap.innerHTML = reportHTML;
+
+    nextLabel.textContent = result === 'win' ? (breakdown.levelUp ? 'الربع التالي ⬆️' : 'العودة للخريطة') : '🔄 أعد المحاولة';
+    if (breakdown.newCard) setTimeout(() => Tutorial.showNewCard(breakdown.newCard), 800);
+    document.getElementById('resultModal').classList.add('active');
+  }
+};
+
+const Tutorial = {
+  currentStep: 0, steps: [], id: null,
+  sequences: {
+    welcome: [
+      { avatar: '👨‍🏫', name: 'المرشد يوسف', role: 'رائد أعمال محنّك',
+        text: `مرحباً يا <strong>رائد الأعمال</strong>! أنا يوسف.<br>
+        <span class="tip">💡 هذه لعبة ريادة أعمال استراتيجية. كل منافسة = <strong>3 أشهر (ربع سنة)</strong>.</span>` },
+      { avatar: '🏦', name: 'رصيد الشركة', role: 'رأس مالك',
+        text: `تبدأ برصيد <strong>${INITIAL_BANK.toLocaleString('ar-SA')} ر.س</strong>.<br>
+        كل مبادرة تطلقها تُخصم من الرصيد مباشرة.<br>
+        <span class="tip">💵 لا سقف للإنفاق — استخدم ما تملك! الرصيد ينمو بالأرباح.</span>` },
+      { avatar: '📅', name: 'دورة الشهر', role: 'كيف يعمل الشهر؟',
+        text: `كل شهر ثلاث مراحل:<br>
+        1. <strong>أنت تختار</strong>: 20 ثانية<br>
+        2. <strong>المنافس يختار</strong> مبادراته<br>
+        3. <strong>السوق يتحرك</strong> ونرى النتائج<br>
+        <span class="tip">⏰ +${MONTHLY_INCOME} ر.س دخل تشغيلي كل شهر.</span>` },
+      { avatar: '🧑', name: 'عملاء SaaS', role: 'إيراد متكرر',
+        text: `العملاء <strong>يتراكمون بشكل دائم</strong> عبر كل المنافسات!<br>
+        كل عميل = <strong>+${SAAS_PER_CUSTOMER} ر.س</strong> في كل ربع قادم.<br>
+        <span class="tip">💡 نموذج SaaS حقيقي — عميل واحد قيمته مدى الحياة.</span>` },
+      { avatar: '🎯', name: 'الصعوبة', role: 'ضبط التحدي',
+        text: `🌱 <strong>سهل</strong>: متكافئ + 3 مستثمرين<br>
+        ⚖️ <strong>متوسط</strong>: منافس أقوى + 2 مستثمر<br>
+        🔥 <strong>صعب</strong>: منافس قوي + مستثمر واحد + أرباح أعلى` },
+      { avatar: '🚀', name: 'هيا نبدأ!', role: 'أول ربع سنة',
+        text: `لنبدأ أول ربع لشركتك!<br>
+        <span class="tip">💪 حظاً موفقاً يا بطل!</span>` }
+    ],
+    battleIntro: [
+      { avatar: '⚔️', name: 'المرشد', role: 'بداية الربع',
+        text: `أهلاً في <strong>شهر ${MONTHS[0]}</strong>!<br>
+        <strong>20 ثانية</strong> لاختيار مبادراتك.<br>
+        <span class="tip">💡 أطلق عدة مبادرات ما دام رصيدك يكفيها!</span>` },
+      { avatar: '🔄', name: 'تسلسل الشهر', role: 'كيف يتم الشهر',
+        text: `بعد دورك:<br>
+        1. المنافس يختار<br>
+        2. السوق يتفاعل<br>
+        3. شهر جديد<br>
+        <span class="tip">⏰ زر "إنهاء الشهر" للتخطي المبكر.</span>` }
+    ],
+    deployment: [
+      { avatar: '📍', name: 'الإطلاق', role: 'اختيار الموقع',
+        text: `اخترت مبادرة! <strong>انقر في المنطقة الخضراء</strong>.<br>
+        <span class="tip">💡 قريب من الوسط = هجومي، قريب من شركتك = دفاعي.</span>` }
+    ],
+    customers: [
+      { avatar: '🧑', name: 'عملاء السوق', role: 'قاعدتك المتنامية',
+        text: `ظهر <strong>عميل</strong> في السوق!<br>
+        أول مبادرة تصله تجذبه لشركتك.<br>
+        <span class="tip">💡 +${SAAS_PER_CUSTOMER} ر.س مدى الحياة لكل عميل!</span>` }
+    ],
+    angelCard: [
+      { avatar: '👼', name: 'المستثمر الملائكي', role: 'شراكة محدودة',
+        text: `<strong>+${ANGEL_BOOST} ر.س</strong> فوراً، لكن يأخذ <strong>30% من أرباحك</strong>!<br>
+        محدود: ${DIFFICULTY[State.difficulty].angelUsesPerQuarter} مرات فقط هذا الربع.<br>
+        <span class="tip">💡 الاستثمار الخارجي سلاح ذو حدين.</span>` }
+    ]
+  },
+  start(id) {
+    if (this.sequences[id] && !State.tutorialsSeen[id + '_done']) {
+      this.id = id;
+      this.steps = this.sequences[id];
+      this.currentStep = 0;
+      this.render();
+      document.getElementById('tutorialOverlay').classList.add('active');
+      if (Battle.active) Battle.paused = true;
+    }
+  },
+  render() {
+    const step = this.steps[this.currentStep];
+    if (!step) return this.close();
+    document.getElementById('tutAvatar').textContent = step.avatar;
+    document.getElementById('tutName').textContent = step.name;
+    document.getElementById('tutRole').textContent = step.role;
+    document.getElementById('tutText').innerHTML = step.text;
+    document.getElementById('tutStep').textContent = `${this.currentStep + 1}/${this.steps.length}`;
+    document.getElementById('tutNextBtn').textContent = this.currentStep === this.steps.length - 1 ? '✓ فهمت!' : 'التالي →';
+  },
+  next() { this.currentStep++; if (this.currentStep >= this.steps.length) this.close(); else this.render(); },
+  close() {
+    document.getElementById('tutorialOverlay').classList.remove('active');
+    if (this.id) { State.tutorialsSeen[this.id + '_done'] = true; State.tutorialsSeen[this.id] = true; State.save(); }
+    this.id = null;
+    if (Battle.active) Battle.paused = false;
+  },
+  skipAll() { this.close(); toast('تم تخطي الشرح', 'warn'); },
+  restart() { State.tutorialsSeen = {}; State.save(); toast('✅ ستظهر الجولات من جديد', 'warn'); this.start('welcome'); },
+  showNewCard(cardKey) {
+    const c = CARDS_DB[cardKey];
+    this.sequences.newCard = [{
+      avatar: c.emoji,
+      name: `مبادرة جديدة: ${c.name}`,
+      role: `تكلفة ${c.cost} ر.س`,
+      text: `<strong>${c.desc}</strong><br><br>💪 قيمة: ${c.mv} — 📊 تأثير: ${c.impact}<br>
+      <span class="tip">💡 أضفها لمجموعتك من "ترتيب المبادرات".</span>`
+    }];
+    this.id = 'newCard_' + cardKey;
+    this.steps = this.sequences.newCard;
+    this.currentStep = 0;
+    this.render();
+    document.getElementById('tutorialOverlay').classList.add('active');
+  }
+};
+
+const UI = {
+  show(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  },
+  updateMenu() {
+    const rank = State.level < 10 ? 'مبتدئ' :
+                 State.level < 25 ? 'صاحب متجر' :
+                 State.level < 50 ? 'رائد أعمال' :
+                 State.level < 75 ? 'مستثمر' :
+                 State.level < 100 ? 'إمبراطور تجاري' : 'أسطورة السوق';
+    document.getElementById('menuLevel').textContent = State.level;
+    document.getElementById('menuRank').textContent = rank;
+    document.getElementById('menuBank').textContent = Math.round(State.bankBalance).toLocaleString('ar-SA');
+    document.getElementById('menuCustomers').textContent = State.totalCustomers.toLocaleString('ar-SA');
+    document.getElementById('menuRecurring').textContent = State.getRecurringRevenue().toLocaleString('ar-SA');
+    this.highlightDifficulty();
+  },
+  setDifficulty(diff) {
+    State.difficulty = diff;
+    State.save();
+    this.highlightDifficulty();
+    toast(`🎯 ${DIFFICULTY[diff].label} - ${DIFFICULTY[diff].angelUsesPerQuarter} استخدامات للمستثمر`, 'warn');
+  },
+  highlightDifficulty() {
+    document.querySelectorAll('.diff-btn').forEach(btn => {
+      btn.classList.toggle('selected', btn.dataset.diff === State.difficulty);
+    });
+  },
+  toggleFullscreen() {
+    const el = document.documentElement;
+    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+      if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
+      else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+      else if (el.msRequestFullscreen) el.msRequestFullscreen();
+      else toast('⚠️ ملء الشاشة غير مدعوم هنا', 'err');
+    } else {
+      if (document.exitFullscreen) document.exitFullscreen();
+      else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+    }
+  },
+  startBattle(levelId) {
+    const id = levelId || State.level;
+    if (id > 100) { toast('🏆 أكملت كل المستويات!', 'warn'); return; }
+    if (State.deck.length === 0) { toast('⚠️ اختر مبادرات لمجموعتك أولاً', 'err'); this.openDeck(); return; }
+    if (State.bankBalance < 300) {
+      toast('🏦 رصيدك منخفض! نمنحك رصيد طوارئ...', 'warn');
+      State.bankBalance = 1500;
+      State.save();
+    }
+    const boss = BOSSES[id - 1];
+    this.show('battleScreen');
+    setTimeout(() => {
+      Battle.arenaRect = document.getElementById('arena').getBoundingClientRect();
+      Battle.start(boss);
+    }, 100);
+  },
+  openDeck() { this.show('deckScreen'); this.renderDeckBuilder(); },
+  renderDeckBuilder() {
+    const my = document.getElementById('myDeckGrid');
+    const all = document.getElementById('allCardsGrid');
+    my.innerHTML = ''; all.innerHTML = '';
+    const deckMax = State.getDeckMax();
+    document.getElementById('deckCount').textContent = State.deck.length;
+    document.getElementById('deckMax').textContent = deckMax;
+    document.getElementById('deckMaxInfo').textContent = deckMax;
+
+    State.deck.forEach(key => {
+      const c = CARDS_DB[key];
+      const el = document.createElement('div');
+      el.className = 'mini-card in-deck';
+      el.innerHTML = `<div class="cost">${c.cost}<span style="font-size:7px;opacity:0.8;">ر.س</span></div><div class="emoji">${c.emoji}</div><div class="name">${c.name}</div><div class="desc">${c.desc}</div>`;
+      el.addEventListener('click', () => {
+        State.deck = State.deck.filter(k => k !== key);
+        this.renderDeckBuilder();
+      });
+      my.appendChild(el);
+    });
+    Object.keys(CARDS_DB).forEach(key => {
+      const c = CARDS_DB[key];
+      const unlocked = State.unlockedCards.includes(key);
+      const inDeck = State.deck.includes(key);
+      const el = document.createElement('div');
+      el.className = 'mini-card' + (unlocked ? '' : ' locked') + (inDeck ? ' in-deck' : '');
+      el.innerHTML = `<div class="cost">${unlocked ? c.cost : '??'}<span style="font-size:7px;opacity:0.8;">ر.س</span></div><div class="emoji">${unlocked ? c.emoji : '🔒'}</div><div class="name">${unlocked ? c.name : 'مقفل'}</div><div class="desc">${unlocked ? c.desc : '---'}</div>`;
+      if (unlocked) {
+        el.addEventListener('click', () => {
+          if (inDeck) State.deck = State.deck.filter(k => k !== key);
+          else if (State.deck.length < deckMax) State.deck.push(key);
+          else { toast(`⚠️ المجموعة ممتلئة (${deckMax})`, 'warn'); return; }
+          this.renderDeckBuilder();
+        });
+      }
+      all.appendChild(el);
+    });
+  },
+  saveDeck() {
+    if (State.deck.length === 0) { toast('⚠️ اختر مبادرة واحدة على الأقل', 'err'); return; }
+    State.save();
+    toast('✅ تم حفظ المجموعة');
+    this.backToMenu();
+  },
+  openLevels() {
+    this.show('levelsScreen');
+    const grid = document.getElementById('levelsGrid');
+    grid.innerHTML = '';
+    BOSSES.forEach(b => {
+      const tile = document.createElement('div');
+      const isCompleted = State.completedLevels.includes(b.id);
+      const isCurrent = b.id === State.level;
+      const isLocked = b.id > State.level;
+      tile.className = 'level-tile' + (isCompleted ? ' completed' : '') + (isCurrent ? ' current' : '') + (isLocked ? ' locked' : '');
+      const emoji = b.stage === 1 ? '🏪' : b.stage === 2 ? '🏢' : b.stage === 3 ? '🏬' : '🏙️';
+      tile.innerHTML = `<div class="emoji">${isCompleted ? '✅' : emoji}</div><div class="num">${b.id}</div>`;
+      if (!isLocked) tile.addEventListener('click', () => this.startBattle(b.id));
+      grid.appendChild(tile);
+    });
+  },
+  openLeaderboard() {
+    this.show('leaderScreen');
+    const list = document.getElementById('leaderList');
+    list.innerHTML = '';
+    const leaders = [
+      { name: 'إلون ع. العربي', score: 1245000 },
+      { name: 'ستيف الحكيم', score: 1120000 },
+      { name: 'بيل المبتكر', score: 1080000 },
+      { name: 'جيف التاجر', score: 970000 },
+      { name: 'وارن الحكيم', score: 890000 },
+      { name: State.playerName + ' (أنت)', score: State.bankBalance + State.getRecurringRevenue() * 4, me: true },
+      { name: 'مارك الشبكي', score: 720000 },
+      { name: 'لاري الباحث', score: 650000 },
+      { name: 'سيرجي الذكي', score: 580000 },
+      { name: 'جاك التاجر', score: 510000 }
+    ];
+    leaders.sort((a, b) => b.score - a.score);
+    leaders.forEach((l, i) => {
+      const row = document.createElement('div');
+      row.className = 'leader-row' + (l.me ? ' me' : '');
+      row.innerHTML = `<span class="rank">#${i+1}</span><span>${l.name}</span><span class="score">${Math.round(l.score).toLocaleString('ar-SA')} ر.س</span>`;
+      list.appendChild(row);
+    });
+  },
+  openHelp() { this.show('helpScreen'); },
+
+  openSoundSettings() {
+    Sound.init();
+    this.refreshSoundSettings();
+    document.getElementById('soundModal').classList.add('active');
+    Sound.play('click');
+  },
+  closeSoundModal() {
+    document.getElementById('soundModal').classList.remove('active');
+    Sound.play('click');
+  },
+  refreshSoundSettings() {
+    document.getElementById('sfxToggle').classList.toggle('active', State.sfxEnabled);
+    document.getElementById('sfxState').textContent = State.sfxEnabled ? 'مفعلة' : 'متوقفة';
+    document.getElementById('musicToggle').classList.toggle('active', State.musicEnabled);
+    document.getElementById('musicState').textContent = State.musicEnabled ? 'مفعلة' : 'متوقفة';
+    document.querySelectorAll('.theme-btn').forEach(b => {
+      b.classList.toggle('selected', b.dataset.theme === State.soundTheme);
+    });
+    const vol = Math.round(State.soundVolume * 100);
+    document.getElementById('volumeSlider').value = vol;
+    document.getElementById('volumeLabel').textContent = vol;
+  },
+  toggleSfx() {
+    Sound.setSfx(!State.sfxEnabled);
+    this.refreshSoundSettings();
+    if (State.sfxEnabled) Sound.play('select');
+  },
+  toggleMusic() {
+    Sound.setMusic(!State.musicEnabled);
+    this.refreshSoundSettings();
+    if (State.sfxEnabled) Sound.play('select');
+  },
+  setSoundTheme(theme) {
+    Sound.setTheme(theme);
+    this.refreshSoundSettings();
+  },
+  setVolume(v) {
+    const val = v / 100;
+    Sound.setVolume(val);
+    document.getElementById('volumeLabel').textContent = v;
+  },
+  backToMenu() {
+    this.updateMenu();
+    this.show('menuScreen');
+    document.getElementById('resultModal').classList.remove('active');
+    const ind = document.getElementById('eventIndicator');
+    if (ind) ind.style.display = 'none';
+    Battle.active = false;
+  },
+  nextOrRetry() {
+    document.getElementById('resultModal').classList.remove('active');
+    this.openLevels();
+  },
+  collectIdle() { document.getElementById('idleModal').classList.remove('active'); this.updateMenu(); },
+  resetGame() { if (confirm('حذف كل التقدم والبدء من جديد؟')) State.reset(); },
+  checkIdleRewards() {
+    const now = Date.now();
+    const lastSeen = State.lastSeen || now;
+    const diffSec = Math.floor((now - lastSeen) / 1000);
+    if (diffSec > 60 && State.totalWins > 0) {
+      const ratePerMin = 8 + State.level * 2 + State.totalCustomers * 0.5;
+      const cappedMin = Math.min(diffSec / 60, 12 * 60);
+      const earned = Math.floor(cappedMin * ratePerMin);
+      if (earned > 0) {
+        State.bankBalance += earned;
+        State.save();
+        const hours = Math.floor(diffSec / 3600);
+        const mins = Math.floor((diffSec % 3600) / 60);
+        let timeStr = '';
+        if (hours > 0) timeStr += `${hours} ساعة `;
+        if (mins > 0) timeStr += `${mins} دقيقة`;
+        if (!timeStr) timeStr = 'أقل من دقيقة';
+        document.getElementById('idleTime').textContent = timeStr;
+        document.getElementById('idleCoins').textContent = earned.toLocaleString('ar-SA');
+        document.getElementById('idleModal').classList.add('active');
+      }
+    }
+    State.lastSeen = now;
+    State.save();
+  }
+};
+
+let toastTimer;
+function toast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (type ? ' ' + type : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.className = 'toast' + (type ? ' ' + type : ''), 2200);
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  State.load();
+  UI.updateMenu();
+  UI.checkIdleRewards();
+
+  // تهيئة الأصوات عند أول تفاعل (Web Audio يحتاج user gesture)
+  const initAudioOnce = () => {
+    Sound.init();
+    if (State.musicEnabled) Sound.startMusic();
+    document.removeEventListener('click', initAudioOnce);
+    document.removeEventListener('touchstart', initAudioOnce);
+  };
+  document.addEventListener('click', initAudioOnce, { once: true });
+  document.addEventListener('touchstart', initAudioOnce, { once: true });
+
+  setTimeout(() => { if (!State.tutorialsSeen.welcome_done) Tutorial.start('welcome'); }, 500);
+  const arena = document.getElementById('arena');
+  arena.addEventListener('click', (e) => { if (Battle.active && Battle.selectedCard) Battle.playerDeploy(e); });
+  window.addEventListener('resize', () => {
+    if (Battle.active) {
+      Battle.arenaRect = document.getElementById('arena').getBoundingClientRect();
+      Battle.positionZones();
+    }
+  });
+  window.addEventListener('beforeunload', () => { State.lastSeen = Date.now(); State.save(); });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      State.lastSeen = Date.now(); State.save();
+      if (Battle.active) Battle.paused = true;
+      Sound.stopMusic();
+    }
+    else {
+      UI.checkIdleRewards();
+      if (State.musicEnabled) Sound.startMusic();
+    }
+  });
+  document.body.addEventListener('touchmove', e => { if (e.scale && e.scale !== 1) e.preventDefault(); }, { passive: false });
+});
+</script>
+
+</body>
+</html>
